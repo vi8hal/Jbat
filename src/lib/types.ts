@@ -9,6 +9,7 @@ export interface BlogPost {
   author: string;
   date: string; // ISO string representation of date
   tags?: string[];
+  imageHint?: string; // For data-ai-hint
 }
 
 export interface NavItem {

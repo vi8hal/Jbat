@@ -1,9 +1,13 @@
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Edit3, Youtube, ArrowRight } from 'lucide-react';
+import { FileText, Edit3, Youtube, ArrowRight, ListOrdered } from 'lucide-react';
+import { getBlogPosts } from '@/lib/blogData'; // To get counts
 
-export default function AdminDashboardPage() {
+export default async function AdminDashboardPage() {
+  const posts = await getBlogPosts(); // Fetch posts for stats
+
   const features = [
     {
       title: "Generate New Blog Post",
@@ -13,20 +17,20 @@ export default function AdminDashboardPage() {
       cta: "Start Generating"
     },
     {
-      title: "Content Editor",
-      description: "Refine and edit your generated or existing blog posts before publishing.",
-      href: "#", // Placeholder, will link to a list of posts or last edited
-      icon: Edit3,
-      cta: "Edit Content",
-      disabled: true,
+      title: "Manage Blog Posts",
+      description: "View, edit, or delete your existing blog posts.",
+      href: "/admin/manage-posts", 
+      icon: ListOrdered,
+      cta: "View Posts",
+      disabled: false,
     },
     {
       title: "YouTube Script Generator",
       description: "Transform your articles into scripts ready for your next YouTube video.",
-      href: "#", // Placeholder
+      href: "/admin/manage-posts", // Should ideally link to a page where user selects a post first
       icon: Youtube,
-      cta: "Create Script",
-      disabled: true,
+      cta: "Select Post for Script", // Updated CTA
+      disabled: false, // Enable if manage-posts allows selecting post for script
     }
   ];
 
@@ -62,7 +66,6 @@ export default function AdminDashboardPage() {
         ))}
       </section>
 
-      {/* Placeholder for recent activity or stats */}
       <section>
         <h2 className="text-2xl font-semibold mb-4">Quick Stats</h2>
         <div className="grid gap-4 md:grid-cols-3">
@@ -71,26 +74,28 @@ export default function AdminDashboardPage() {
               <CardTitle className="text-lg">Total Posts</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold">12</p> {/* Mock Data */}
-              <p className="text-xs text-muted-foreground">+2 this month</p>
+              <p className="text-3xl font-bold">{posts.length}</p>
+              {/* <p className="text-xs text-muted-foreground">+2 this month</p> */}
             </CardContent>
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Pending Edits</CardTitle>
+              <CardTitle className="text-lg">Last Post Date</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold">3</p> {/* Mock Data */}
-               <Link href="#" className="text-xs text-primary hover:underline">View pending</Link>
+              <p className="text-xl font-bold">
+                {posts.length > 0 ? new Date(posts[0].date).toLocaleDateString() : 'N/A'}
+              </p>
+               <Link href="/admin/manage-posts" className="text-xs text-primary hover:underline">View all posts</Link>
             </CardContent>
           </Card>
            <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Scripts Generated</CardTitle>
+              <CardTitle className="text-lg">Scripts (Coming Soon)</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold">5</p> {/* Mock Data */}
-               <p className="text-xs text-muted-foreground">Last generated: 2 days ago</p>
+              <p className="text-3xl font-bold">0</p> 
+               <p className="text-xs text-muted-foreground">Functionality under development</p>
             </CardContent>
           </Card>
         </div>

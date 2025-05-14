@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -13,7 +14,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Home, FileText, Edit3, Youtube, LogOut, NewspaperIcon } from 'lucide-react';
+import { Home, FileText, Edit3, Youtube, LogOut, NewspaperIcon, ListOrdered } from 'lucide-react';
 import type { NavItem } from '@/lib/types';
 import { logout } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
@@ -21,7 +22,7 @@ import { useRouter } from 'next/navigation';
 const adminNavItems: NavItem[] = [
   { title: 'Dashboard', href: '/admin/dashboard', icon: Home },
   { title: 'Generate Blog', href: '/admin/generate-blog', icon: FileText },
-  // { title: 'Manage Posts', href: '/admin/manage-posts', icon: Edit3 }, // Example for future expansion
+  { title: 'Manage Posts', href: '/admin/manage-posts', icon: ListOrdered },
 ];
 
 export default function AdminSidebar() {
@@ -48,7 +49,7 @@ export default function AdminSidebar() {
             <SidebarMenuItem key={item.title}>
               <Link href={item.href} legacyBehavior passHref>
                 <SidebarMenuButton
-                  isActive={pathname === item.href}
+                  isActive={pathname === item.href || (item.href === '/admin/manage-posts' && pathname.startsWith('/admin/edit-blog'))}
                   tooltip={item.title}
                   className="justify-start"
                 >

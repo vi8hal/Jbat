@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -13,6 +14,7 @@ import { summarizeNewsArticle, SummarizeNewsArticleOutput } from '@/ai/flows/sum
 import { generateBlogContent, GenerateBlogContentOutput } from '@/ai/flows/generate-blog-content';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
+// No direct import from blogData needed here as it redirects to BlogEditor which handles saving.
 
 export default function GenerateBlogForm() {
   const [inputType, setInputType] = useState<'article' | 'prompt'>('prompt');
@@ -36,10 +38,10 @@ export default function GenerateBlogForm() {
     }
     setIsSummarizing(true);
     setSummaryOutput(null);
-    setSummaryProgress(10); // Initial progress
+    setGeneratedBlog(null); // Clear previous generation
+    setSummaryProgress(10); 
 
     try {
-      // Simulate progress for demo as the current AI flow doesn't stream progress
       const interval = setInterval(() => {
         setSummaryProgress(prev => Math.min(prev + 15, 80));
       }, 300);
@@ -74,7 +76,7 @@ export default function GenerateBlogForm() {
     try {
       const result = await generateBlogContent({ prompt: finalPrompt });
       setGeneratedBlog(result);
-      toast({ title: "Blog Post Generated!", description: "Your new blog post is ready." });
+      toast({ title: "Blog Post Generated!", description: "Your new blog post is ready for editing." });
     } catch (error) {
       console.error("Blog generation error:", error);
       toast({ title: "Generation Failed", description: (error as Error).message || "Could not generate the blog post.", variant: "destructive" });
@@ -85,8 +87,6 @@ export default function GenerateBlogForm() {
 
   const handleEditBlog = () => {
     if (generatedBlog) {
-      // For simplicity, passing content via query params.
-      // In a real app, save to DB and pass ID or use a state management solution.
       const query = new URLSearchParams({
         title: generatedBlog.title,
         content: generatedBlog.content,
@@ -99,12 +99,12 @@ export default function GenerateBlogForm() {
     <Card className="w-full paper-shadow">
       <CardHeader>
         <CardTitle className="text-2xl">AI Blog Generator</CardTitle>
-        <CardDescription>Create blog content from news articles or your own prompts.</CardDescription>
+        <CardDescription>Create blog content from news articles or your own prompts. The generated content will appear below for you to take to the editor.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex space-x-2">
-          <Button variant={inputType === 'prompt' ? 'default' : 'outline'} onClick={() => setInputType('prompt')}>Use Prompt</Button>
-          <Button variant={inputType === 'article' ? 'default' : 'outline'} onClick={() => setInputType('article')}>Use News Article</Button>
+          <Button variant={inputType === 'prompt' ? 'default' : 'outline'} onClick={() => {setInputType('prompt'); setSummaryOutput(null); setArticleContent(''); setGeneratedBlog(null);}}>Use Prompt</Button>
+          <Button variant={inputType === 'article' ? 'default' : 'outline'} onClick={() => {setInputType('article'); setGeneratedBlog(null);}}>Use News Article</Button>
         </div>
 
         {inputType === 'article' && (
@@ -130,7 +130,7 @@ export default function GenerateBlogForm() {
                 <AlertDescription className="space-y-2">
                   <p><strong>Summary:</strong> {summaryOutput.summary}</p>
                   <p><strong>Suitability Score:</strong> {summaryOutput.suitabilityScore?.toFixed(2)} / 1.0</p>
-                  <p><em>Progress: {summaryOutput.progress}</em></p>
+                  {/* <p><em>Progress: {summaryOutput.progress}</em></p> */}
                 </AlertDescription>
               </Alert>
             )}
@@ -139,7 +139,7 @@ export default function GenerateBlogForm() {
         
         <div className="space-y-2">
           <Label htmlFor="userPrompt">
-            {inputType === 'article' ? "Additional context or angle for the blog post (optional)" : "Your Blog Post Prompt"}
+            {inputType === 'article' ? "Additional context or angle for the blog post (optional, used with summary)" : "Your Blog Post Prompt"}
           </Label>
           <Textarea
             id="userPrompt"
@@ -147,30 +147,51 @@ export default function GenerateBlogForm() {
             value={userPrompt}
             onChange={(e) => setUserPrompt(e.target.value)}
             rows={3}
-            disabled={isSummarizing || isGenerating}
+            disabled={isSummarizing || isGenerating || (inputType === 'article' && !articleContent.trim())}
           />
         </div>
         
-        <Button onClick={handleGenerateBlog} disabled={isGenerating || isSummarizing || (inputType === 'prompt' && !userPrompt.trim()) || (inputType === 'article' && !summaryOutput) }>
+        <Button 
+          onClick={handleGenerateBlog} 
+          disabled={
+            isGenerating || 
+            isSummarizing || 
+            (inputType === 'prompt' && !userPrompt.trim()) || 
+            (inputType === 'article' && (!summaryOutput && !userPrompt.trim())) ||
+            (inputType === 'article' && !articleContent.trim())
+          }
+          className="w-full md:w-auto"
+        >
           {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Generate Blog Post
+          <Sparkles className="mr-2 h-4 w-4" /> Generate Blog Post
         </Button>
 
         {generatedBlog && (
           <Card className="mt-6">
             <CardHeader>
-              <CardTitle>Generated Blog Post</CardTitle>
+              <CardTitle>Generated Blog Post Draft</CardTitle>
+              <CardDescription>Review the AI-generated draft below. Click "Edit Full Post" to refine and save it.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <h3 className="text-xl font-semibold">{generatedBlog.title}</h3>
-              <div className="prose prose-sm max-w-none dark:prose-invert h-48 overflow-y-auto border rounded-md p-2 bg-muted/50">
-                <p>{generatedBlog.content.substring(0, 500)}...</p> 
+              <div className="space-y-1">
+                <Label htmlFor="generatedTitle" className="text-sm font-medium">Generated Title</Label>
+                <Input id="generatedTitle" readOnly value={generatedBlog.title} className="font-semibold bg-muted/30" />
+              </div>
+               <div className="space-y-1">
+                <Label htmlFor="generatedContentPreview" className="text-sm font-medium">Generated Content Preview</Label>
+                <Textarea 
+                    id="generatedContentPreview"
+                    readOnly 
+                    value={generatedBlog.content} 
+                    className="prose prose-sm max-w-none dark:prose-invert h-48 bg-muted/30"
+                    rows={10}
+                />
               </div>
             </CardContent>
             <CardFooter>
-              <Button onClick={handleEditBlog} variant="outline">
+              <Button onClick={handleEditBlog} variant="default" size="lg" className="w-full md:w-auto">
                 <Edit className="mr-2 h-4 w-4" />
-                Edit Full Post
+                Edit Full Post in Editor
               </Button>
             </CardFooter>
           </Card>
