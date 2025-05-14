@@ -1,0 +1,71 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import {
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarFooter,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarTrigger,
+} from '@/components/ui/sidebar';
+import { Button } from '@/components/ui/button';
+import { Home, FileText, Edit3, Youtube, LogOut, NewspaperIcon } from 'lucide-react';
+import type { NavItem } from '@/lib/types';
+import { logout } from '@/lib/auth';
+import { useRouter } from 'next/navigation';
+
+const adminNavItems: NavItem[] = [
+  { title: 'Dashboard', href: '/admin/dashboard', icon: Home },
+  { title: 'Generate Blog', href: '/admin/generate-blog', icon: FileText },
+  // { title: 'Manage Posts', href: '/admin/manage-posts', icon: Edit3 }, // Example for future expansion
+];
+
+export default function AdminSidebar() {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
+
+  return (
+    <Sidebar collapsible="icon">
+      <SidebarHeader className="p-4 flex items-center justify-between">
+        <Link href="/admin/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+           <NewspaperIcon className="h-7 w-7 text-primary group-data-[collapsible=icon]:mx-auto" />
+           <span className="font-semibold text-lg group-data-[collapsible=icon]:hidden">ContentGenius</span>
+        </Link>
+        <SidebarTrigger className="md:hidden" />
+      </SidebarHeader>
+      <SidebarContent className="flex-1">
+        <SidebarMenu>
+          {adminNavItems.map((item) => (
+            <SidebarMenuItem key={item.title}>
+              <Link href={item.href} legacyBehavior passHref>
+                <SidebarMenuButton
+                  isActive={pathname === item.href}
+                  tooltip={item.title}
+                  className="justify-start"
+                >
+                  {item.icon && <item.icon className="h-5 w-5" />}
+                  <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarContent>
+      <SidebarFooter className="p-2">
+         <Button variant="ghost" className="w-full justify-start gap-2 group-data-[collapsible=icon]:justify-center" onClick={handleLogout}>
+            <LogOut className="h-5 w-5" />
+            <span className="group-data-[collapsible=icon]:hidden">Logout</span>
+          </Button>
+      </SidebarFooter>
+    </Sidebar>
+  );
+}
