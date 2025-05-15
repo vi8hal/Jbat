@@ -20,14 +20,22 @@ export default async function HomePage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <section className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4 tracking-tight lg:text-5xl">Welcome to ContentGenius</h1>
-        <p className="text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
-          Your AI-powered partner for creating compelling blog content and YouTube scripts effortlessly.
-        </p>
-        <Button size="lg" asChild>
-          <Link href="/admin/dashboard">Get Started</Link>
-        </Button>
+      {/* Removed Hero Section */}
+      {/* New Ad Section */}
+      <section className="mb-12 text-center">
+        <div className="inline-block border p-2 rounded-lg shadow-sm bg-muted/30">
+          <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Advertisement">
+            <Image
+              src="https://placehold.co/728x90.png"
+              alt="Advertisement Banner"
+              width={728}
+              height={90}
+              data-ai-hint="advertisement banner"
+              className="rounded"
+            />
+          </a>
+          <p className="text-xs text-muted-foreground mt-1">Advertisement</p>
+        </div>
       </section>
 
       {featuredPost && (
