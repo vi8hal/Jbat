@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Edit3, Youtube, ArrowRight, ListOrdered } from 'lucide-react';
 import { getBlogPosts } from '@/lib/blogData'; // To get counts
+import DashboardHeaderActions from '@/components/admin/DashboardHeaderActions';
 
 export default async function AdminDashboardPage() {
   const posts = await getBlogPosts(); // Fetch posts for stats
@@ -36,9 +37,12 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <header className="pb-4 border-b">
-        <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back, Admin! Manage your content creation workflow here.</p>
+      <header className="pb-4 border-b flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+          <p className="text-muted-foreground">Welcome back, Admin! Manage your content creation workflow here.</p>
+        </div>
+        <DashboardHeaderActions />
       </header>
 
       <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
