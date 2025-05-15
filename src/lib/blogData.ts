@@ -39,6 +39,8 @@ let mockBlogPosts: BlogPost[] = [
     author: 'AI Insights Team',
     date: '2024-05-15T10:00:00Z',
     tags: ['AI', 'Content Creation', 'Future Tech', 'Innovation'],
+    isFeatured: false,
+    featuredAt: null,
   },
   {
     id: '2',
@@ -51,6 +53,8 @@ let mockBlogPosts: BlogPost[] = [
     author: 'Video Virtuoso',
     date: '2024-05-10T14:30:00Z',
     tags: ['YouTube', 'Video Scripting', 'Content Marketing'],
+    isFeatured: true,
+    featuredAt: new Date().toISOString(), // Featured for demo
   },
   {
     id: '3',
@@ -63,6 +67,8 @@ let mockBlogPosts: BlogPost[] = [
     author: 'Prompt Engineer Pro',
     date: '2024-05-05T09:15:00Z',
     tags: ['AI Prompts', 'Creativity', 'Content Generation'],
+    isFeatured: false,
+    featuredAt: null,
   },
 ];
 
@@ -72,6 +78,16 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 export async function getBlogPosts(): Promise<BlogPost[]> {
   await delay(100); // Simulate network delay
   return [...mockBlogPosts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
+export async function getLandingPageNews(): Promise<BlogPost | null> {
+  await delay(50);
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const featuredPosts = mockBlogPosts
+    .filter(post => post.isFeatured && post.featuredAt && new Date(post.featuredAt) > twentyFourHoursAgo)
+    .sort((a, b) => new Date(b.featuredAt!).getTime() - new Date(a.featuredAt!).getTime());
+  
+  return featuredPosts.length > 0 ? { ...featuredPosts[0] } : null;
 }
 
 export async function getBlogPostById(id: string): Promise<BlogPost | null> {
@@ -90,9 +106,8 @@ type CreateBlogPostData = Omit<BlogPost, 'id' | 'slug' | 'date'> & { date?: stri
 
 export async function addBlogPost(postData: CreateBlogPostData): Promise<BlogPost> {
   await delay(200);
-  const newId = String(Date.now() + Math.random()); // Simple unique ID
+  const newId = String(Date.now() + Math.random()); 
   const slug = generateSlug(postData.title);
-  // Ensure slug is unique (basic check, could be more robust)
   let finalSlug = slug;
   let counter = 1;
   while (mockBlogPosts.some(p => p.slug === finalSlug)) {
@@ -101,17 +116,28 @@ export async function addBlogPost(postData: CreateBlogPostData): Promise<BlogPos
   }
   
   const newPost: BlogPost = {
-    ...postData,
     id: newId,
     slug: finalSlug,
-    date: postData.date || new Date().toISOString(),
-    excerpt: postData.excerpt || postData.content.substring(0, 150).replace(/<[^>]*>/g, '') + '...', // Basic excerpt
+    title: postData.title,
+    content: postData.content,
+    excerpt: postData.excerpt || postData.content.substring(0, 150).replace(/<[^>]*>/g, '') + '...',
     imageUrl: postData.imageUrl || `https://placehold.co/600x400.png`,
     imageHint: postData.imageHint || 'placeholder image',
     author: postData.author || 'Admin',
+    date: postData.date || new Date().toISOString(),
     tags: postData.tags || [],
+    isFeatured: postData.isFeatured || false,
+    featuredAt: postData.featuredAt || null,
   };
-  mockBlogPosts.unshift(newPost); // Add to the beginning of the array
+
+  // If this post is being featured, unfeature any other currently featured posts
+  if (newPost.isFeatured) {
+    mockBlogPosts.forEach(p => {
+      if (p.id !== newPost.id) p.isFeatured = false;
+    });
+  }
+
+  mockBlogPosts.unshift(newPost);
   return {...newPost};
 }
 
@@ -125,10 +151,9 @@ export async function updateBlogPost(id: string, postData: UpdateBlogPostData): 
   }
 
   const existingPost = mockBlogPosts[postIndex];
-  const updatedPost = { ...existingPost, ...postData };
+  const updatedPostData = { ...existingPost, ...postData };
 
   if (postData.title && postData.title !== existingPost.title) {
-    // Regenerate slug if title changed, ensure uniqueness
     const newSlug = generateSlug(postData.title);
     let finalSlug = newSlug;
     let counter = 1;
@@ -136,16 +161,25 @@ export async function updateBlogPost(id: string, postData: UpdateBlogPostData): 
       finalSlug = `${newSlug}-${counter}`;
       counter++;
     }
-    updatedPost.slug = finalSlug;
+    updatedPostData.slug = finalSlug;
   }
   
   if (postData.content && !postData.excerpt) {
-    updatedPost.excerpt = postData.content.substring(0, 150).replace(/<[^>]*>/g, '') + '...';
+    updatedPostData.excerpt = postData.content.substring(0, 150).replace(/<[^>]*>/g, '') + '...';
   }
 
+  // If this post is being featured, unfeature any other currently featured posts
+  if (updatedPostData.isFeatured && updatedPostData.id) {
+     mockBlogPosts.forEach(p => {
+      if (p.id !== updatedPostData.id) {
+        p.isFeatured = false; 
+        // p.featuredAt = null; // Optionally reset featuredAt for others
+      }
+    });
+  }
 
-  mockBlogPosts[postIndex] = updatedPost;
-  return {...updatedPost};
+  mockBlogPosts[postIndex] = updatedPostData;
+  return {...updatedPostData};
 }
 
 export async function deleteBlogPost(id: string): Promise<boolean> {

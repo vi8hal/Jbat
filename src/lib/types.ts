@@ -10,6 +10,8 @@ export interface BlogPost {
   date: string; // ISO string representation of date
   tags?: string[];
   imageHint?: string; // For data-ai-hint
+  isFeatured?: boolean; // True if this post is to be featured on the landing page
+  featuredAt?: string | null; // ISO string, time when it was marked as featured
 }
 
 export interface NavItem {

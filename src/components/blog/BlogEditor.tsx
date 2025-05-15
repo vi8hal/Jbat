@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Save, Youtube, Loader2, Trash2, Eye, TagsIcon } from 'lucide-react';
+import { Save, Youtube, Loader2, Trash2, Eye, Megaphone } from 'lucide-react'; // Added Megaphone
+import { Switch } from '@/components/ui/switch'; // Added Switch
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { addBlogPost, getBlogPostById, updateBlogPost, deleteBlogPost } from '@/lib/blogData';
@@ -23,10 +24,12 @@ interface BlogEditorProps {
 export default function BlogEditor({ initialTitleProp = '', initialContentProp = '', blogId }: BlogEditorProps) {
   const [title, setTitle] = useState(initialTitleProp);
   const [content, setContent] = useState(initialContentProp);
-  const [author, setAuthor] = useState('Admin'); // Default author
-  const [tagsString, setTagsString] = useState(''); // Comma-separated tags
+  const [author, setAuthor] = useState('Admin');
+  const [tagsString, setTagsString] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [imageHint, setImageHint] = useState('');
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [featuredAt, setFeaturedAt] = useState<string | null>(null);
   const [currentPost, setCurrentPost] = useState<BlogPost | null>(null);
   
   const [isLoading, setIsLoading] = useState(false);
@@ -49,6 +52,8 @@ export default function BlogEditor({ initialTitleProp = '', initialContentProp =
             setTagsString(post.tags?.join(', ') || '');
             setImageUrl(post.imageUrl || '');
             setImageHint(post.imageHint || '');
+            setIsFeatured(post.isFeatured || false);
+            setFeaturedAt(post.featuredAt || null);
           } else {
             toast({ title: "Error", description: "Blog post not found.", variant: "destructive" });
             router.push('/admin/manage-posts');
@@ -59,9 +64,10 @@ export default function BlogEditor({ initialTitleProp = '', initialContentProp =
         })
         .finally(() => setIsLoading(false));
     } else {
-      // For new posts, use props if available (e.g., from generate form)
       setTitle(initialTitleProp);
       setContent(initialContentProp);
+      setIsFeatured(false); // Default for new posts
+      setFeaturedAt(null);
     }
   }, [blogId, initialTitleProp, initialContentProp, router, toast]);
 
@@ -71,13 +77,25 @@ export default function BlogEditor({ initialTitleProp = '', initialContentProp =
       return;
     }
     setIsSaving(true);
+    
+    let postIsFeatured = isFeatured;
+    let postFeaturedAt = featuredAt;
+
+    if (isFeatured && !featuredAt) { // If switch is on but featuredAt is not set (e.g. turned on just now)
+        postFeaturedAt = new Date().toISOString();
+    } else if (!isFeatured) { // If switch is off
+        postFeaturedAt = null;
+    }
+
     const postData = {
       title,
       content,
       author,
       tags: tagsString.split(',').map(tag => tag.trim()).filter(tag => tag),
-      imageUrl: imageUrl.trim() || undefined, // Make undefined if empty to use default
+      imageUrl: imageUrl.trim() || undefined, 
       imageHint: imageHint.trim() || undefined,
+      isFeatured: postIsFeatured,
+      featuredAt: postFeaturedAt,
     };
 
     try {
@@ -85,11 +103,15 @@ export default function BlogEditor({ initialTitleProp = '', initialContentProp =
       if (blogId === 'new') {
         savedPost = await addBlogPost(postData);
         toast({ title: "Blog Post Created!", description: `"${savedPost.title}" has been saved successfully.` });
-        router.push(`/admin/edit-blog/${savedPost.id}`); // Redirect to edit page of new post
+        router.push(`/admin/edit-blog/${savedPost.id}`); 
       } else {
         savedPost = await updateBlogPost(blogId, postData);
         toast({ title: "Blog Post Updated!", description: `"${savedPost?.title}" has been updated successfully.` });
-        setCurrentPost(savedPost); // Update current post state
+        setCurrentPost(savedPost); 
+        if (savedPost) { // Update local state for featured status from potentially modified backend data
+            setIsFeatured(savedPost.isFeatured || false);
+            setFeaturedAt(savedPost.featuredAt || null);
+        }
       }
     } catch (error) {
       console.error("Save error:", error);
@@ -127,6 +149,16 @@ export default function BlogEditor({ initialTitleProp = '', initialContentProp =
       }).toString();
     router.push(`/admin/youtube-script/${blogId || 'new'}?${query}`);
   };
+
+  const handleFeatureToggle = (checked: boolean) => {
+    setIsFeatured(checked);
+    if (checked) {
+      setFeaturedAt(new Date().toISOString());
+    } else {
+      setFeaturedAt(null);
+    }
+  };
+
 
   if (isLoading) {
     return <Skeleton className="w-full h-[600px]" />;
@@ -218,6 +250,18 @@ export default function BlogEditor({ initialTitleProp = '', initialContentProp =
             className="min-h-[400px] text-base leading-relaxed"
             disabled={isSaving || isDeleting}
           />
+        </div>
+        <div className="flex items-center space-x-2 py-4 border-t border-b">
+          <Switch
+            id="feature-on-landing"
+            checked={isFeatured}
+            onCheckedChange={handleFeatureToggle}
+            disabled={isSaving || isDeleting}
+          />
+          <Label htmlFor="feature-on-landing" className="flex items-center">
+            <Megaphone className="mr-2 h-4 w-4 text-primary" />
+            Feature this post on the landing page (for 24 hours)
+          </Label>
         </div>
       </CardContent>
       <CardFooter className="flex flex-col sm:flex-row justify-between gap-2 pt-6 border-t">
