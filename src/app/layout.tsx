@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en"> {/* Removed className={``} */}
+    <html lang="en">
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
         {children}
         <Toaster />
