@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Newspaper } from 'lucide-react';
+import { Newspaper, LogIn } from 'lucide-react'; // Added LogIn icon
 
 export default function Header() {
   return (
@@ -16,8 +16,10 @@ export default function Header() {
           {/* Add other public navigation links here if needed */}
         </nav>
         <div className="flex items-center space-x-2">
-          <Button asChild variant="outline">
-            <Link href="/admin/dashboard">Admin Sign In</Link>
+          <Button asChild variant="outline" size="icon" aria-label="Admin Sign In">
+            <Link href="/admin/dashboard">
+              <LogIn className="h-5 w-5" />
+            </Link>
           </Button>
         </div>
       </div>
