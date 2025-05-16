@@ -15,9 +15,8 @@ export default function DashboardHeaderActions() {
   };
 
   return (
-    <Button variant="outline" size="sm" onClick={handleLogout}>
-      <LogOut className="mr-2 h-4 w-4" />
-      Logout
+    <Button variant="outline" size="icon" onClick={handleLogout} aria-label="Logout">
+      <LogOut className="h-4 w-4" />
     </Button>
   );
 }
