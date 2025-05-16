@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={``}> {/* Removed geistSans.variable and geistMono.variable */}
+    <html lang="en"> {/* Removed className={``} */}
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
         {children}
         <Toaster />
