@@ -1,11 +1,12 @@
 
 'use client'; // Required for useEffect and useRouter, and SidebarProvider
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import AdminSidebar from '@/components/layout/AdminSidebar';
 import { checkAuth } from '@/lib/auth-client';
 import { Toaster } from '@/components/ui/toaster';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminLayout({
   children,
@@ -13,22 +14,31 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
+  const isAuthenticated = checkAuth();
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && !checkAuth()) {
+    // This effect ensures that client-specific logic runs only after mounting
+    setIsClient(true);
+    if (!isAuthenticated) {
       router.replace('/login');
     }
-  }, [router]);
+  }, [router, isAuthenticated]);
   
-  // Prevent rendering children if redirecting or not authenticated on client
-  if (typeof window !== 'undefined' && !checkAuth()) {
+  // While waiting for the client to mount and check auth, show a loader or skeleton.
+  // This ensures the server render and initial client render are the same.
+  if (!isClient || !isAuthenticated) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p>Redirecting to login...</p>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        {/* You can use a more sophisticated skeleton loader here */}
+        <div className="space-y-4 w-1/2">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
+        </div>
       </div>
     );
   }
-
 
   return (
     <SidebarProvider defaultOpen={true}>
