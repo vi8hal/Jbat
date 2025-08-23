@@ -1,6 +1,47 @@
 
-import type { BlogPost } from './types';
-import { mockUsers } from './auth'; // Import mock users to get author info
+import type { BlogPost, User, Company } from './types';
+import bcrypt from 'bcryptjs';
+
+// --- MOCK DATABASE ---
+
+export const mockCompanies: Company[] = [
+  { id: 'company-01', name: 'Innovate Inc.', address: '123 Tech Ave' },
+  { id: 'company-02', name: 'Quantum Finance', address: '456 Wall St' },
+  { id: 'company-03', name: 'Vitality Health', address: '789 Wellness Blvd' },
+  { id: 'company-04', name: 'Eco Solutions', address: '101 Green Way' },
+  { id: 'company-05', name: 'RetailNext', address: '212 Market St' },
+  { id: 'company-06', name: 'Wanderlust Travels', address: '303 Adventure Rd' },
+  { id: 'company-07', name: 'Gourmet Group', address: '404 Eatery Ln' },
+  { id: 'company-08', name: 'AutoMotion', address: '505 Piston Dr' },
+  { id: 'company-09', name: 'Homestead Realty', address: '606 Property Plz' },
+  { id: 'company-10', name: 'Media Stream', address: '707 Broadcast Bld' },
+];
+
+export let mockUsers: User[] = [
+  { id: 'user-01', username: 'tech_writer', email: 'tech@innovate.com', password: 'password123', companyId: 'company-01', mobile: '111-222-3333' },
+  { id: 'user-02', username: 'finance_guru', email: 'fin@quantum.com', password: 'password123', companyId: 'company-02', mobile: '222-333-4444' },
+  { id: 'user-03', username: 'health_expert', email: 'health@vitality.com', password: 'password123', companyId: 'company-03', mobile: '333-444-5555' },
+  { id: 'user-04', username: 'green_advocate', email: 'eco@solutions.com', password: 'password123', companyId: 'company-04', mobile: '444-555-6666' },
+  { id: 'user-05', username: 'retail_innovator', email: 'shop@retailnext.com', password: 'password123', companyId: 'company-05', mobile: '555-666-7777' },
+  { id: 'user-06', username: 'travel_blogger', email: 'go@wanderlust.com', password: 'password123', companyId: 'company-06', mobile: '666-777-8888' },
+  { id: 'user-07', username: 'food_critic', email: 'eat@gourmet.com', password: 'password123', companyId: 'company-07', mobile: '777-888-9999' },
+  { id: 'user-08', username: 'auto_enthusiast', email: 'drive@automotion.com', password: 'password123', companyId: 'company-08', mobile: '888-999-0000' },
+  { id: 'user-09', username: 'realestate_pro', email: 'sell@homestead.com', password: 'password123', companyId: 'company-09', mobile: '999-000-1111' },
+  { id: 'user-10', username: 'media_maven', email: 'watch@mediastream.com', password: 'password123', companyId: 'company-10', mobile: '000-111-2222' },
+];
+
+// Hash passwords for the mock users
+(async () => {
+    const hashedUsers = await Promise.all(mockUsers.map(async (user) => {
+        if (user.password) {
+            const hashedPassword = await bcrypt.hash(user.password, 10);
+            return { ...user, hashedPassword };
+        }
+        return user;
+    }));
+    mockUsers = hashedUsers;
+})();
+
 
 // Function to generate a simple slug
 const generateSlug = (title: string): string => {
@@ -22,7 +63,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'A deep dive into how Artificial Intelligence is shaping the future of technology, from development to deployment.',
         content: '<p>The tech industry is on the brink of a massive transformation, all thanks to AI...</p>',
         authorId: 'user-01',
-        author: 'Tech Writer',
+        author: 'tech_writer',
         date: '2024-05-20T10:00:00Z',
         tags: ['AI', 'Tech', 'Innovation'],
         imageUrl: 'https://placehold.co/800x400.png',
@@ -37,7 +78,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'Cloud computing continues to evolve. Here are the top trends that businesses should be paying attention to this year.',
         content: '<p>Cloud computing is more than just storage; it\'s a paradigm for modern business operations...</p>',
         authorId: 'user-01',
-        author: 'Tech Writer',
+        author: 'tech_writer',
         date: '2024-04-15T11:00:00Z',
         tags: ['Cloud', 'SaaS', 'Infrastructure'],
         imageUrl: 'https://placehold.co/800x400.png',
@@ -51,7 +92,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'FinTech startups are changing the financial landscape with innovative solutions. Are traditional banks ready to adapt?',
         content: '<p>The world of finance is experiencing a seismic shift, driven by technology...</p>',
         authorId: 'user-02',
-        author: 'Finance Guru',
+        author: 'finance_guru',
         date: '2024-05-18T14:00:00Z',
         tags: ['FinTech', 'Banking', 'Investment'],
         imageUrl: 'https://placehold.co/800x400.png',
@@ -64,7 +105,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'In times of economic uncertainty, a sound investment strategy is more important than ever. Here’s how to navigate the waves.',
         content: '<p>Market volatility can be daunting, but with the right approach, it can also present opportunities...</p>',
         authorId: 'user-02',
-        author: 'Finance Guru',
+        author: 'finance_guru',
         date: '2024-04-22T09:30:00Z',
         tags: ['Markets', 'Investing', 'Strategy'],
         imageUrl: 'https://placehold.co/800x400.png',
@@ -78,7 +119,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'The pandemic accelerated the adoption of telemedicine. What does the future hold for virtual healthcare?',
         content: '<p>Access to healthcare is being redefined by digital platforms...</p>',
         authorId: 'user-03',
-        author: 'Health Expert',
+        author: 'health_expert',
         date: '2024-05-19T08:00:00Z',
         tags: ['Telemedicine', 'HealthTech', 'Wellness'],
         imageUrl: 'https://placehold.co/800x400.png',
@@ -91,7 +132,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'Companies are beginning to understand the importance of mental wellness. Here’s how to create a supportive work environment.',
         content: '<p>A healthy workforce is a productive workforce. This includes mental well-being...</p>',
         authorId: 'user-03',
-        author: 'Health Expert',
+        author: 'health_expert',
         date: '2024-04-25T16:00:00Z',
         tags: ['Mental Health', 'Workplace', 'HR'],
         imageUrl: 'https://placehold.co/800x400.png',
@@ -105,7 +146,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'From solar to wind, renewable energy is becoming more accessible and affordable. What’s driving this green transition?',
         content: '<p>The global shift towards sustainability is powering innovation in the energy sector...</p>',
         authorId: 'user-04',
-        author: 'Green Advocate',
+        author: 'green_advocate',
         date: '2024-05-17T12:00:00Z',
         tags: ['Sustainability', 'Renewable Energy', 'Climate'],
         imageUrl: 'https://placehold.co/800x400.png',
@@ -118,7 +159,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'Sustainability isn’t just good for the planet; it’s good for business. Here are some practices to implement.',
         content: '<p>Integrating sustainability into your business model can lead to long-term success...</p>',
         authorId: 'user-04',
-        author: 'Green Advocate',
+        author: 'green_advocate',
         date: '2024-04-28T14:00:00Z',
         tags: ['Eco-Friendly', 'Business', 'CSR'],
         imageUrl: 'https://placehold.co/800x400.png',
@@ -132,7 +173,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'AI-driven personalization is the next frontier in e-commerce. How can retailers leverage it to boost sales?',
         content: '<p>The online shopping experience is becoming smarter, faster, and more personal...</p>',
         authorId: 'user-05',
-        author: 'Retail Innovator',
+        author: 'retail_innovator',
         date: '2024-05-16T15:00:00Z',
         tags: ['E-commerce', 'Retail', 'AI'],
         imageUrl: 'https://placehold.co/800x400.png',
@@ -145,7 +186,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'Physical retail isn’t dead; it’s evolving. Discover how stores are using technology to create immersive experiences.',
         content: '<p>In an age of e-commerce, physical stores must offer more than just products...</p>',
         authorId: 'user-05',
-        author: 'Retail Innovator',
+        author: 'retail_innovator',
         date: '2024-04-30T10:00:00Z',
         tags: ['Retail', 'CX', 'Technology'],
         imageUrl: 'https://placehold.co/800x400.png',
@@ -159,7 +200,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'Beyond the tourist hotspots lies a world of adventure. Here are some of the best-kept secrets of Southeast Asia.',
         content: '<p>Looking for a unique travel experience? Let\'s explore off the beaten path...</p>',
         authorId: 'user-06',
-        author: 'Travel Blogger',
+        author: 'travel_blogger',
         date: '2024-05-14T18:00:00Z',
         tags: ['Travel', 'Adventure', 'Asia'],
         imageUrl: 'https://placehold.co/800x400.png',
@@ -172,7 +213,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'Travel is a privilege. Here’s how you can explore the world while minimizing your impact on the environment and local communities.',
         content: '<p>Sustainable tourism is about making conscious choices to protect the places we love...</p>',
         authorId: 'user-06',
-        author: 'Travel Blogger',
+        author: 'travel_blogger',
         date: '2024-04-20T13:00:00Z',
         tags: ['Sustainable Travel', 'Ecotourism', 'Responsible Tourism'],
         imageUrl: 'https://placehold.co/800x400.png',
@@ -186,7 +227,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'The restaurant industry is adapting with delivery-only models. What does this mean for diners and chefs?',
         content: '<p>Ghost kitchens are changing the way we eat, one delivery at a time...</p>',
         authorId: 'user-07',
-        author: 'Food Critic',
+        author: 'food_critic',
         date: '2024-05-12T20:00:00Z',
         tags: ['Food', 'Restaurants', 'FoodTech'],
         imageUrl: 'https://placehold.co/800x400.png',
@@ -199,7 +240,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'From gourmet vegan cheese to mushroom steaks, the plant-based food scene has never been more exciting.',
         content: '<p>Plant-based eating has gone mainstream, and chefs are getting creative...</p>',
         authorId: 'user-07',
-        author: 'Food Critic',
+        author: 'food_critic',
         date: '2024-04-18T19:00:00Z',
         tags: ['Vegan', 'Plant-Based', 'Food Trends'],
         imageUrl: 'https://placehold.co/800x400.png',
@@ -213,7 +254,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'Electric vehicles are the future, but what challenges remain for mass adoption? We look at the state of the EV market.',
         content: '<p>The shift to electric vehicles is accelerating, but roadblocks remain...</p>',
         authorId: 'user-08',
-        author: 'Auto Enthusiast',
+        author: 'auto_enthusiast',
         date: '2024-05-10T11:00:00Z',
         tags: ['EV', 'Automotive', 'Technology'],
         imageUrl: 'https://placehold.co/800x400.png',
@@ -226,7 +267,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'Why do classic cars continue to captivate us? A look at the culture and community behind these timeless machines.',
         content: '<p>In an era of high-tech vehicles, the appeal of classic cars is stronger than ever...</p>',
         authorId: 'user-08',
-        author: 'Auto Enthusiast',
+        author: 'auto_enthusiast',
         date: '2024-04-12T15:00:00Z',
         tags: ['Classic Cars', 'Culture', 'Automotive'],
         imageUrl: 'https://placehold.co/800x400.png',
@@ -240,7 +281,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'From virtual tours to blockchain transactions, technology is transforming the real estate industry.',
         content: '<p>The real estate market is undergoing a digital revolution, thanks to PropTech...</p>',
         authorId: 'user-09',
-        author: 'RealEstate Pro',
+        author: 'realestate_pro',
         date: '2024-05-08T09:00:00Z',
         tags: ['PropTech', 'Real Estate', 'Technology'],
         imageUrl: 'https://placehold.co/800x400.png',
@@ -253,7 +294,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'Interest rates, inventory, and economic factors: what can we expect from the housing market for the rest of the year?',
         content: '<p>Predicting the housing market is never easy, but certain indicators can give us a clue...</p>',
         authorId: 'user-09',
-        author: 'RealEstate Pro',
+        author: 'realestate_pro',
         date: '2024-04-05T17:00:00Z',
         tags: ['Housing Market', 'Forecast', 'Real Estate'],
         imageUrl: 'https://placehold.co/800x400.png',
@@ -267,7 +308,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'With so many services competing for our attention, what does the future hold for streaming media?',
         content: '<p>The battle for streaming supremacy is heating up, and consumers are caught in the middle...</p>',
         authorId: 'user-10',
-        author: 'Media Maven',
+        author: 'media_maven',
         date: '2024-05-05T14:00:00Z',
         tags: ['Streaming', 'Media', 'Entertainment'],
         imageUrl: 'https://placehold.co/800x400.png',
@@ -280,7 +321,7 @@ let mockBlogPosts: BlogPost[] = [
         excerpt: 'The creator economy has opened up new career paths. What does it take to succeed in this dynamic field?',
         content: '<p>From YouTubers to podcasters, creators are the new entrepreneurs...</p>',
         authorId: 'user-10',
-        author: 'Media Maven',
+        author: 'media_maven',
         date: '2024-04-01T12:00:00Z',
         tags: ['Creator Economy', 'Social Media', 'Digital Marketing'],
         imageUrl: 'https://placehold.co/800x400.png',
