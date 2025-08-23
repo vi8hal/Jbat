@@ -9,7 +9,7 @@ export default function Header() {
         <Link href="/" className="mr-6 flex items-center space-x-2">
           <Newspaper className="h-6 w-6 text-primary" />
           <span className="font-bold sm:inline-block text-lg">
-            ContentGenius
+            JBat
           </span>
         </Link>
         <nav className="flex flex-1 items-center space-x-4">

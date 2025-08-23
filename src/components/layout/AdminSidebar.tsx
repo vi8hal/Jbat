@@ -39,7 +39,7 @@ export default function AdminSidebar() {
       <SidebarHeader className="p-4 flex items-center justify-between">
         <Link href="/admin/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
            <NewspaperIcon className="h-7 w-7 text-primary group-data-[collapsible=icon]:mx-auto" />
-           <span className="font-semibold text-lg group-data-[collapsible=icon]:hidden">ContentGenius</span>
+           <span className="font-semibold text-lg group-data-[collapsible=icon]:hidden">JBat</span>
         </Link>
         <SidebarTrigger className="md:hidden" />
       </SidebarHeader>

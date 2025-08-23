@@ -8,7 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 // const geistMono = GeistMono; // Removed problematic constant
 
 export const metadata: Metadata = {
-  title: 'ContentGenius',
+  title: 'JBat',
   description: 'AI-Powered Content Creation Platform',
 };
 
