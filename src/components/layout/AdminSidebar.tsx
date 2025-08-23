@@ -48,16 +48,17 @@ export default function AdminSidebar() {
         <SidebarMenu>
           {adminNavItems.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <Link href={item.href} legacyBehavior passHref>
-                <SidebarMenuButton
-                  isActive={pathname.startsWith(item.href) && item.href !== '/admin/dashboard' || pathname === item.href}
-                  tooltip={item.title}
-                  className="justify-start"
-                >
+              <SidebarMenuButton
+                asChild
+                isActive={pathname.startsWith(item.href) && item.href !== '/admin/dashboard' || pathname === item.href}
+                tooltip={item.title}
+                className="justify-start"
+              >
+                <Link href={item.href}>
                   {item.icon && <item.icon className="h-5 w-5" />}
                   <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
-                </SidebarMenuButton>
-              </Link>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
