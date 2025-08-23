@@ -1,16 +1,22 @@
 import { defineConfig } from "drizzle-kit";
 import "dotenv/config";
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL is missing from .env file");
+if (!process.env.TURSO_DATABASE_URL) {
+  throw new Error("TURSO_DATABASE_URL is missing from .env file");
 }
+if (!process.env.TURSO_AUTH_TOKEN) {
+  throw new Error("TURSO_AUTH_TOKEN is missing from .env file");
+}
+
 
 export default defineConfig({
   schema: "./src/lib/db/schema.ts",
   out: "./drizzle",
-  dialect: "postgresql",
+  dialect: "sqlite",
+  driver: "turso",
   dbCredentials: {
-    url: process.env.DATABASE_URL,
+    url: process.env.TURSO_DATABASE_URL,
+    authToken: process.env.TURSO_AUTH_TOKEN,
   },
   verbose: true,
   strict: true,

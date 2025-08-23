@@ -1,26 +1,21 @@
-import { pgTable, text, varchar, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
+import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 import { createId } from '@paralleldrive/cuid2';
 
-export const companies = pgTable('companies', {
-  id: varchar('id').primaryKey().$defaultFn(() => createId()),
-  name: varchar('name', { length: 256 }).notNull().unique(),
+export const companies = sqliteTable('companies', {
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  name: text('name').notNull().unique(),
   address: text('address').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 
-export const users = pgTable('users', {
-  id: varchar('id').primaryKey().$defaultFn(() => createId()),
-  username: varchar('username', { length: 256 }).notNull().unique(),
-  email: varchar('email', { length: 256 }).notNull().unique(),
+export const users = sqliteTable('users', {
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  username: text('username').notNull().unique(),
+  email: text('email').notNull().unique(),
   hashedPassword: text('hashed_password').notNull(),
-  mobile: varchar('mobile', { length: 50 }),
-  companyId: varchar('company_id').notNull().references(() => companies.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+  mobile: text('mobile'),
+  companyId: text('company_id').notNull().references(() => companies.id, { onDelete: 'cascade' }),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
   passwordResetToken: text('password_reset_token'),
-  passwordResetExpires: timestamp('password_reset_expires'),
-}, (table) => {
-  return {
-    emailIdx: uniqueIndex("email_idx").on(table.email),
-    usernameIdx: uniqueIndex("username_idx").on(table.username),
-  };
+  passwordResetExpires: integer('password_reset_expires', { mode: 'timestamp' }),
 });
