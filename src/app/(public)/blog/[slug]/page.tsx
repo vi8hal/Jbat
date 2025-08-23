@@ -16,22 +16,22 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex flex-col lg:flex-row gap-8">
-        <article className="flex-1 lg:w-2/3">
+    <div className="container mx-auto py-12 px-4 md:px-6">
+      <div className="grid lg:grid-cols-4 gap-8">
+        <article className="lg:col-span-3">
           {post.imageUrl && (
             <div className="relative h-64 md:h-96 w-full mb-8 rounded-lg overflow-hidden shadow-lg">
               <Image
                 src={post.imageUrl}
                 alt={post.title}
-                fill // Changed from layout="fill" objectFit="cover"
-                style={{ objectFit: 'cover' }} // Added for fill
+                fill
+                style={{ objectFit: 'cover' }}
                 priority
                 data-ai-hint={post.imageHint || "article hero image"}
               />
             </div>
           )}
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">{post.title}</h1>
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">{post.title}</h1>
           
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6 text-sm text-muted-foreground">
             <div className="flex items-center">
@@ -61,9 +61,9 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
           />
         </article>
         
-        <div className="lg:w-1/3 lg:sticky lg:top-24 self-start">
+        <aside className="lg:col-span-1 lg:sticky lg:top-24 self-start">
           <AdSidebar />
-        </div>
+        </aside>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Newspaper, LogIn } from 'lucide-react'; // Added LogIn icon
+import { Newspaper, LogIn, Rss } from 'lucide-react'; 
 
 export default function Header() {
   return (
@@ -12,8 +13,10 @@ export default function Header() {
             JBat
           </span>
         </Link>
-        <nav className="flex flex-1 items-center space-x-4">
-          {/* Add other public navigation links here if needed */}
+        <nav className="flex flex-1 items-center space-x-6">
+            <Link href="/blog" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+                Blog
+            </Link>
         </nav>
         <div className="flex items-center space-x-2">
           <Button asChild variant="outline" size="icon" aria-label="Admin Sign In">

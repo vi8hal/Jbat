@@ -1,111 +1,121 @@
 
-import type { BlogPost } from '@/lib/types';
-import { getBlogPosts, getLandingPageNews } from '@/lib/blogData';
-import BlogPostCard from '@/components/blog/BlogPostCard';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowRight, BotMessageSquare, Edit, Youtube } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Megaphone, CalendarDays, UserCircle } from 'lucide-react';
 
-export default async function HomePage() {
-  const featuredPost = await getLandingPageNews();
-  const allPosts = await getBlogPosts();
+const features = [
+  {
+    icon: <BotMessageSquare className="h-10 w-10 text-primary" />,
+    title: 'AI-Powered Blog Generation',
+    description: 'Go from a simple prompt or news article to a full-fledged blog post in seconds. Our AI understands context and crafts engaging content.',
+  },
+  {
+    icon: <Youtube className="h-10 w-10 text-primary" />,
+    title: 'YouTube Script Creator',
+    description: 'Repurpose your blog content effortlessly. Generate compelling video scripts based on your articles to expand your reach on YouTube.',
+  },
+  {
+    icon: <Edit className="h-10 w-10 text-primary" />,
+    title: 'Full Content Management',
+    description: 'A complete CRUD interface to manage your posts. Edit, delete, and feature articles on your landing page with a simple click.',
+  },
+];
 
-  let latestPostsForGrid: BlogPost[];
-  if (featuredPost) {
-    latestPostsForGrid = allPosts.filter(p => p.id !== featuredPost.id).slice(0, 3);
-  } else {
-    latestPostsForGrid = allPosts.slice(0, 3);
-  }
-
+export default function LandingPage() {
   return (
-    <div className="container mx-auto py-8 px-4">
-      {/* Removed Hero Section */}
-      {/* New Ad Section */}
-      <section className="mb-12 text-center">
-        <div className="inline-block border p-2 rounded-lg shadow-sm bg-muted/30">
-          <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Advertisement">
-            <Image
-              src="https://placehold.co/728x90.png"
-              alt="Advertisement Banner"
-              width={728}
-              height={90}
-              data-ai-hint="advertisement banner"
-              className="rounded"
-            />
-          </a>
-          <p className="text-xs text-muted-foreground mt-1">Advertisement</p>
-        </div>
-      </section>
-
-      {featuredPost && (
-        <section className="mb-16 p-6 bg-secondary/50 rounded-lg shadow-lg paper-shadow">
-          <div className="flex items-center text-primary mb-4">
-            <Megaphone className="h-6 w-6 mr-2" />
-            <h2 className="text-2xl font-semibold">Featured News (Live for 24hrs)</h2>
-          </div>
-          <div className="flex flex-col md:flex-row gap-6 items-start">
-            {featuredPost.imageUrl && (
-              <div className="md:w-1/3 relative h-60 w-full md:h-auto md:aspect-[4/3] rounded-md overflow-hidden flex-shrink-0">
-                <Image
-                  src={featuredPost.imageUrl}
-                  alt={featuredPost.title}
-                  fill
-                  style={{ objectFit: 'cover' }}
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  data-ai-hint={featuredPost.imageHint || "featured news"}
-                  priority
-                />
+    <div className="flex flex-col min-h-screen">
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="w-full py-20 md:py-32 lg:py-40 bg-secondary/50">
+          <div className="container mx-auto px-4 md:px-6 text-center">
+            <div className="max-w-3xl mx-auto">
+              <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl text-foreground">
+                AI-Powered Content Creation, Simplified.
+              </h1>
+              <p className="mt-4 text-lg text-muted-foreground md:text-xl">
+                Welcome to JBat. Your intelligent partner for creating compelling blog content and YouTube scripts effortlessly.
+              </p>
+              <div className="mt-8">
+                <Button asChild size="lg">
+                  <Link href="/admin/dashboard">
+                    Go to Dashboard <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
               </div>
-            )}
-            <div className="flex-1">
-              <h3 className="text-3xl font-bold mb-2 leading-tight hover:text-primary transition-colors">
-                <Link href={`/blog/${featuredPost.slug}`}>{featuredPost.title}</Link>
-              </h3>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground mb-3">
-                <div className="flex items-center">
-                  <UserCircle className="mr-1 h-4 w-4" />
-                  <span>{featuredPost.author}</span>
-                </div>
-                <div className="flex items-center">
-                  <CalendarDays className="mr-1 h-4 w-4" />
-                  <span>{new Date(featuredPost.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                </div>
-                 {featuredPost.featuredAt && (
-                  <div className="flex items-center text-primary-focus font-medium">
-                     <Megaphone className="mr-1 h-4 w-4" /> 
-                    Featured: {new Date(featuredPost.featuredAt).toLocaleTimeString()}
-                  </div>
-                )}
-              </div>
-              <p className="text-muted-foreground mb-4 line-clamp-4">{featuredPost.excerpt}</p>
-              <Button asChild variant="link" className="px-0 text-primary">
-                <Link href={`/blog/${featuredPost.slug}`}>Read Full Story &rarr;</Link>
-              </Button>
             </div>
           </div>
         </section>
-      )}
 
-      <section>
-        <h2 className="text-3xl font-semibold mb-8 text-center border-b pb-4">
-          {featuredPost ? "More Latest Articles" : "Latest Articles"}
-        </h2>
-        {latestPostsForGrid.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {latestPostsForGrid.map((post) => (
-              <BlogPostCard key={post.id} post={post} />
-            ))}
+        {/* Features Section */}
+        <section id="features" className="w-full py-20 md:py-24 lg:py-32">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="text-center max-w-2xl mx-auto mb-16">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Everything You Need to Scale Your Content</h2>
+              <p className="mt-4 text-muted-foreground">
+                From ideation to publication, JBat provides the tools to streamline your entire content workflow.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {features.map((feature, index) => (
+                <Card key={index} className="flex flex-col items-center text-center p-6 paper-shadow">
+                  <div className="mb-4">{feature.icon}</div>
+                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                  <p className="text-muted-foreground flex-grow">{feature.description}</p>
+                </Card>
+              ))}
+            </div>
           </div>
-        ) : (
-          <p className="text-center text-muted-foreground">
-            {allPosts.length > 0 && featuredPost ? "No other articles to display right now." : "No articles yet. Check back soon!"}
-          </p>
-        )}
-         {allPosts.length === 0 && !featuredPost && (
-             <p className="text-center text-muted-foreground">No articles yet. Check back soon!</p>
-         )}
-      </section>
+        </section>
+
+        {/* How it Works Section */}
+        <section className="w-full py-20 md:py-24 lg:py-32 bg-secondary/50">
+            <div className="container mx-auto px-4 md:px-6">
+                 <div className="text-center max-w-2xl mx-auto mb-16">
+                    <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Get Started in 3 Easy Steps</h2>
+                    <p className="mt-4 text-muted-foreground">
+                        Creating content has never been this simple.
+                    </p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                    <div className="flex flex-col items-center">
+                        <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground text-2xl font-bold mb-4">1</div>
+                        <h3 className="text-xl font-semibold mb-2">Provide a Prompt</h3>
+                        <p className="text-muted-foreground">Start with a news article URL or your own creative idea.</p>
+                    </div>
+                     <div className="flex flex-col items-center">
+                        <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground text-2xl font-bold mb-4">2</div>
+                        <h3 className="text-xl font-semibold mb-2">Generate Content</h3>
+                        <p className="text-muted-foreground">Let our AI generate a high-quality draft for your blog or video.</p>
+                    </div>
+                     <div className="flex flex-col items-center">
+                        <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground text-2xl font-bold mb-4">3</div>
+                        <h3 className="text-xl font-semibold mb-2">Edit & Publish</h3>
+                        <p className="text-muted-foreground">Use our rich editor to finalize and publish your masterpiece.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {/* Final CTA Section */}
+        <section className="w-full py-20 md:py-24">
+          <div className="container mx-auto px-4 md:px-6 text-center">
+            <div className="max-w-2xl mx-auto">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Ready to Revolutionize Your Content?</h2>
+              <p className="mt-4 text-muted-foreground">
+                Click the button below to log in and start generating amazing content with the power of AI.
+              </p>
+              <div className="mt-8">
+                <Button asChild size="lg" variant="default">
+                  <Link href="/admin/dashboard">
+                    Get Started Now <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
