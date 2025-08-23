@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, KeyRound } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { login, signUp, forgotPassword } from '@/lib/auth';
+import { saveAuth } from '@/lib/auth-client';
 
 type FormType = 'signIn' | 'signUp' | 'forgotPassword';
 
@@ -41,8 +42,9 @@ export default function AuthForm() {
     const result = await login(identifier, password);
     setIsLoading(false);
 
-    if (result.success) {
+    if (result.success && result.user) {
       toast({ title: "Login Successful", description: "Redirecting to dashboard..." });
+      saveAuth(result.user);
       router.push('/admin/dashboard');
     } else {
       toast({ title: "Login Failed", description: result.message, variant: "destructive" });
@@ -57,9 +59,17 @@ export default function AuthForm() {
     });
     setIsLoading(false);
 
-    if (result.success) {
+    if (result.success && result.user) {
       toast({ title: "Sign Up Successful!", description: "You are now logged in. Redirecting..." });
-      router.push('/admin/dashboard');
+      // Log in the new user automatically
+      const loginResult = await login(result.user.email, password);
+      if (loginResult.success && loginResult.user) {
+        saveAuth(loginResult.user);
+        router.push('/admin/dashboard');
+      } else {
+         toast({ title: "Auto-Login Failed", description: "Please log in manually.", variant: "destructive" });
+         setFormType('signIn');
+      }
     } else {
       toast({ title: "Sign Up Failed", description: result.message, variant: "destructive" });
     }

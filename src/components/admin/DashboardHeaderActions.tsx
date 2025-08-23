@@ -11,7 +11,8 @@ export default function DashboardHeaderActions() {
 
   const handleLogout = () => {
     logout();
-    router.push('/'); // Changed from /login to /
+    router.push('/');
+    router.refresh(); // Force a refresh to clear server-side state
   };
 
   return (

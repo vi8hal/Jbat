@@ -1,5 +1,6 @@
 
 import type { BlogPost } from './types';
+import { mockUsers } from './auth'; // Import mock users to get author info
 
 // Function to generate a simple slug
 const generateSlug = (title: string): string => {
@@ -13,71 +14,290 @@ const generateSlug = (title: string): string => {
 };
 
 let mockBlogPosts: BlogPost[] = [
-  {
-    id: '1',
-    slug: 'ai-in-content-creation',
-    title: 'The Future of Content: How AI is Revolutionizing Creation',
-    excerpt: 'Explore the transformative impact of artificial intelligence on content generation, from automated writing to personalized experiences.',
-    content: `
-        <p>Artificial intelligence (AI) is no longer a futuristic concept; it's a present-day reality reshaping numerous industries, and content creation is no exception. From automated journalism to AI-powered marketing copy, the landscape of how we produce and consume information is undergoing a profound transformation.</p>
-        <h2 class="text-2xl font-semibold my-4">Understanding AI's Role in Content</h2>
-        <p>AI algorithms can analyze vast amounts of data, understand context, and generate human-like text, images, and even video. This capability opens up a plethora of opportunities for content creators, marketers, and businesses.</p>
-        <ul class="list-disc list-inside my-4 space-y-2">
-          <li><strong>Automated Content Generation:</strong> Tools can now draft articles, product descriptions, and social media posts.</li>
-          <li><strong>Personalization:</strong> AI can tailor content to individual user preferences, enhancing engagement.</li>
-          <li><strong>Data Analysis and Insights:</strong> AI helps in understanding content performance and identifying trends.</li>
-          <li><strong>Content Curation:</strong> AI can sift through massive volumes of information to find relevant content.</li>
-        </ul>
-        <p>While AI offers incredible efficiency, the human touch remains crucial for creativity, emotional depth, and strategic oversight. The future likely involves a synergistic relationship where AI augments human capabilities, rather than replacing them entirely.</p>
-        <blockquote class="border-l-4 border-primary pl-4 italic my-6">
-          "The best way to predict the future is to create it. AI gives us new tools to imagine and build that future of content."
-        </blockquote>
-        <p>As we move forward, ethical considerations, data privacy, and the potential for bias in AI-generated content will be critical areas to address. However, the potential for AI to democratize content creation and unlock new forms of storytelling is undeniable.</p>
-      `,
-    imageUrl: 'https://placehold.co/800x400.png',
-    imageHint: 'article hero image',
-    author: 'AI Insights Team',
-    date: '2024-05-15T10:00:00Z',
-    tags: ['AI', 'Content Creation', 'Future Tech', 'Innovation'],
-    isFeatured: false,
-    featuredAt: null,
-  },
-  {
-    id: '2',
-    slug: 'mastering-youtube-scripts',
-    title: 'From Blog to Blockbuster: Crafting Engaging YouTube Scripts',
-    excerpt: 'Learn the art of transforming your blog posts into captivating YouTube scripts that keep your audience hooked.',
-    content: '<p>Full content here about YouTube scripts...</p>',
-    imageUrl: 'https://placehold.co/600x400.png',
-    imageHint: 'video production',
-    author: 'Video Virtuoso',
-    date: '2024-05-10T14:30:00Z',
-    tags: ['YouTube', 'Video Scripting', 'Content Marketing'],
-    isFeatured: true,
-    featuredAt: new Date().toISOString(), // Featured for demo
-  },
-  {
-    id: '3',
-    slug: 'the-power-of-prompts',
-    title: 'Unlocking Creativity: The Power of Effective AI Prompts',
-    excerpt: 'Discover how well-crafted prompts can unleash the full potential of AI content generators, leading to more relevant and engaging articles.',
-    content: '<p>Full content here about AI prompts...</p>',
-    imageUrl: 'https://placehold.co/600x400.png',
-    imageHint: 'creative lightbulb',
-    author: 'Prompt Engineer Pro',
-    date: '2024-05-05T09:15:00Z',
-    tags: ['AI Prompts', 'Creativity', 'Content Generation'],
-    isFeatured: false,
-    featuredAt: null,
-  },
+    // Posts for User 1 (tech_writer)
+    {
+        id: '1',
+        slug: 'the-future-of-ai-in-tech',
+        title: 'The Future of AI in the Tech Industry',
+        excerpt: 'A deep dive into how Artificial Intelligence is shaping the future of technology, from development to deployment.',
+        content: '<p>The tech industry is on the brink of a massive transformation, all thanks to AI...</p>',
+        authorId: 'user-01',
+        author: 'Tech Writer',
+        date: '2024-05-20T10:00:00Z',
+        tags: ['AI', 'Tech', 'Innovation'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'futuristic technology',
+        isFeatured: true,
+        featuredAt: new Date().toISOString(),
+    },
+    {
+        id: '2',
+        slug: 'cloud-computing-trends-2024',
+        title: 'Top Cloud Computing Trends to Watch in 2024',
+        excerpt: 'Cloud computing continues to evolve. Here are the top trends that businesses should be paying attention to this year.',
+        content: '<p>Cloud computing is more than just storage; it\'s a paradigm for modern business operations...</p>',
+        authorId: 'user-01',
+        author: 'Tech Writer',
+        date: '2024-04-15T11:00:00Z',
+        tags: ['Cloud', 'SaaS', 'Infrastructure'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'cloud data',
+    },
+    // Posts for User 2 (finance_guru)
+    {
+        id: '3',
+        slug: 'fintech-disruption',
+        title: 'How FinTech is Disrupting Traditional Banking',
+        excerpt: 'FinTech startups are changing the financial landscape with innovative solutions. Are traditional banks ready to adapt?',
+        content: '<p>The world of finance is experiencing a seismic shift, driven by technology...</p>',
+        authorId: 'user-02',
+        author: 'Finance Guru',
+        date: '2024-05-18T14:00:00Z',
+        tags: ['FinTech', 'Banking', 'Investment'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'financial technology',
+    },
+    {
+        id: '4',
+        slug: 'navigating-market-volatility',
+        title: 'Strategies for Navigating Market Volatility',
+        excerpt: 'In times of economic uncertainty, a sound investment strategy is more important than ever. Here’s how to navigate the waves.',
+        content: '<p>Market volatility can be daunting, but with the right approach, it can also present opportunities...</p>',
+        authorId: 'user-02',
+        author: 'Finance Guru',
+        date: '2024-04-22T09:30:00Z',
+        tags: ['Markets', 'Investing', 'Strategy'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'stock market chart',
+    },
+    // Posts for User 3 (health_expert)
+    {
+        id: '5',
+        slug: 'telemedicine-revolution',
+        title: 'The Telemedicine Revolution: Healthcare from Home',
+        excerpt: 'The pandemic accelerated the adoption of telemedicine. What does the future hold for virtual healthcare?',
+        content: '<p>Access to healthcare is being redefined by digital platforms...</p>',
+        authorId: 'user-03',
+        author: 'Health Expert',
+        date: '2024-05-19T08:00:00Z',
+        tags: ['Telemedicine', 'HealthTech', 'Wellness'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'doctor online',
+    },
+    {
+        id: '6',
+        slug: 'mental-health-in-the-workplace',
+        title: 'Prioritizing Mental Health in the Modern Workplace',
+        excerpt: 'Companies are beginning to understand the importance of mental wellness. Here’s how to create a supportive work environment.',
+        content: '<p>A healthy workforce is a productive workforce. This includes mental well-being...</p>',
+        authorId: 'user-03',
+        author: 'Health Expert',
+        date: '2024-04-25T16:00:00Z',
+        tags: ['Mental Health', 'Workplace', 'HR'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'calm office',
+    },
+    // Posts for User 4 (green_advocate)
+    {
+        id: '7',
+        slug: 'sustainable-energy-solutions',
+        title: 'The Rise of Sustainable Energy Solutions',
+        excerpt: 'From solar to wind, renewable energy is becoming more accessible and affordable. What’s driving this green transition?',
+        content: '<p>The global shift towards sustainability is powering innovation in the energy sector...</p>',
+        authorId: 'user-04',
+        author: 'Green Advocate',
+        date: '2024-05-17T12:00:00Z',
+        tags: ['Sustainability', 'Renewable Energy', 'Climate'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'wind turbines',
+    },
+    {
+        id: '8',
+        slug: 'eco-friendly-business-practices',
+        title: 'Eco-Friendly Practices for Modern Businesses',
+        excerpt: 'Sustainability isn’t just good for the planet; it’s good for business. Here are some practices to implement.',
+        content: '<p>Integrating sustainability into your business model can lead to long-term success...</p>',
+        authorId: 'user-04',
+        author: 'Green Advocate',
+        date: '2024-04-28T14:00:00Z',
+        tags: ['Eco-Friendly', 'Business', 'CSR'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'green office',
+    },
+    // Posts for User 5 (retail_innovator)
+    {
+        id: '9',
+        slug: 'future-of-e-commerce',
+        title: 'The Future of E-commerce: AI and Personalization',
+        excerpt: 'AI-driven personalization is the next frontier in e-commerce. How can retailers leverage it to boost sales?',
+        content: '<p>The online shopping experience is becoming smarter, faster, and more personal...</p>',
+        authorId: 'user-05',
+        author: 'Retail Innovator',
+        date: '2024-05-16T15:00:00Z',
+        tags: ['E-commerce', 'Retail', 'AI'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'online shopping',
+    },
+    {
+        id: '10',
+        slug: 'brick-and-mortar-reimagined',
+        title: 'Reimagining the Brick-and-Mortar Experience',
+        excerpt: 'Physical retail isn’t dead; it’s evolving. Discover how stores are using technology to create immersive experiences.',
+        content: '<p>In an age of e-commerce, physical stores must offer more than just products...</p>',
+        authorId: 'user-05',
+        author: 'Retail Innovator',
+        date: '2024-04-30T10:00:00Z',
+        tags: ['Retail', 'CX', 'Technology'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'modern store',
+    },
+    // Posts for User 6 (travel_blogger)
+    {
+        id: '11',
+        slug: 'hidden-gems-of-southeast-asia',
+        title: 'Hidden Gems of Southeast Asia',
+        excerpt: 'Beyond the tourist hotspots lies a world of adventure. Here are some of the best-kept secrets of Southeast Asia.',
+        content: '<p>Looking for a unique travel experience? Let\'s explore off the beaten path...</p>',
+        authorId: 'user-06',
+        author: 'Travel Blogger',
+        date: '2024-05-14T18:00:00Z',
+        tags: ['Travel', 'Adventure', 'Asia'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'tropical beach',
+    },
+    {
+        id: '12',
+        slug: 'sustainable-tourism',
+        title: 'How to Be a More Sustainable Tourist',
+        excerpt: 'Travel is a privilege. Here’s how you can explore the world while minimizing your impact on the environment and local communities.',
+        content: '<p>Sustainable tourism is about making conscious choices to protect the places we love...</p>',
+        authorId: 'user-06',
+        author: 'Travel Blogger',
+        date: '2024-04-20T13:00:00Z',
+        tags: ['Sustainable Travel', 'Ecotourism', 'Responsible Tourism'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'nature trail',
+    },
+    // Posts for User 7 (food_critic)
+    {
+        id: '13',
+        slug: 'the-rise-of-ghost-kitchens',
+        title: 'The Rise of Ghost Kitchens and Virtual Restaurants',
+        excerpt: 'The restaurant industry is adapting with delivery-only models. What does this mean for diners and chefs?',
+        content: '<p>Ghost kitchens are changing the way we eat, one delivery at a time...</p>',
+        authorId: 'user-07',
+        author: 'Food Critic',
+        date: '2024-05-12T20:00:00Z',
+        tags: ['Food', 'Restaurants', 'FoodTech'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'food delivery',
+    },
+    {
+        id: '14',
+        slug: 'plant-based-diet-trends',
+        title: 'The Hottest Trends in Plant-Based Dining',
+        excerpt: 'From gourmet vegan cheese to mushroom steaks, the plant-based food scene has never been more exciting.',
+        content: '<p>Plant-based eating has gone mainstream, and chefs are getting creative...</p>',
+        authorId: 'user-07',
+        author: 'Food Critic',
+        date: '2024-04-18T19:00:00Z',
+        tags: ['Vegan', 'Plant-Based', 'Food Trends'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'vegan dish',
+    },
+    // Posts for User 8 (auto_enthusiast)
+    {
+        id: '15',
+        slug: 'electric-vehicle-revolution',
+        title: 'The EV Revolution: Are We There Yet?',
+        excerpt: 'Electric vehicles are the future, but what challenges remain for mass adoption? We look at the state of the EV market.',
+        content: '<p>The shift to electric vehicles is accelerating, but roadblocks remain...</p>',
+        authorId: 'user-08',
+        author: 'Auto Enthusiast',
+        date: '2024-05-10T11:00:00Z',
+        tags: ['EV', 'Automotive', 'Technology'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'electric car',
+    },
+    {
+        id: '16',
+        slug: 'classic-cars-in-the-modern-age',
+        title: 'The Allure of Classic Cars in the Modern Age',
+        excerpt: 'Why do classic cars continue to captivate us? A look at the culture and community behind these timeless machines.',
+        content: '<p>In an era of high-tech vehicles, the appeal of classic cars is stronger than ever...</p>',
+        authorId: 'user-08',
+        author: 'Auto Enthusiast',
+        date: '2024-04-12T15:00:00Z',
+        tags: ['Classic Cars', 'Culture', 'Automotive'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'classic car',
+    },
+    // Posts for User 9 (realestate_pro)
+    {
+        id: '17',
+        slug: 'proptech-innovations',
+        title: 'PropTech: How Technology is Shaping Real Estate',
+        excerpt: 'From virtual tours to blockchain transactions, technology is transforming the real estate industry.',
+        content: '<p>The real estate market is undergoing a digital revolution, thanks to PropTech...</p>',
+        authorId: 'user-09',
+        author: 'RealEstate Pro',
+        date: '2024-05-08T09:00:00Z',
+        tags: ['PropTech', 'Real Estate', 'Technology'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'modern house',
+    },
+    {
+        id: '18',
+        slug: 'housing-market-forecast-2024',
+        title: '2024 Housing Market Forecast',
+        excerpt: 'Interest rates, inventory, and economic factors: what can we expect from the housing market for the rest of the year?',
+        content: '<p>Predicting the housing market is never easy, but certain indicators can give us a clue...</p>',
+        authorId: 'user-09',
+        author: 'RealEstate Pro',
+        date: '2024-04-05T17:00:00Z',
+        tags: ['Housing Market', 'Forecast', 'Real Estate'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'house for sale',
+    },
+    // Posts for User 10 (media_maven)
+    {
+        id: '19',
+        slug: 'future-of-streaming-wars',
+        title: 'The Future of the Streaming Wars',
+        excerpt: 'With so many services competing for our attention, what does the future hold for streaming media?',
+        content: '<p>The battle for streaming supremacy is heating up, and consumers are caught in the middle...</p>',
+        authorId: 'user-10',
+        author: 'Media Maven',
+        date: '2024-05-05T14:00:00Z',
+        tags: ['Streaming', 'Media', 'Entertainment'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'tv streaming',
+    },
+    {
+        id: '20',
+        slug: 'the-creator-economy',
+        title: 'Navigating the Creator Economy',
+        excerpt: 'The creator economy has opened up new career paths. What does it take to succeed in this dynamic field?',
+        content: '<p>From YouTubers to podcasters, creators are the new entrepreneurs...</p>',
+        authorId: 'user-10',
+        author: 'Media Maven',
+        date: '2024-04-01T12:00:00Z',
+        tags: ['Creator Economy', 'Social Media', 'Digital Marketing'],
+        imageUrl: 'https://placehold.co/800x400.png',
+        imageHint: 'social media icons',
+    }
 ];
 
 // Simulate API delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-export async function getBlogPosts(): Promise<BlogPost[]> {
-  await delay(100); // Simulate network delay
-  return [...mockBlogPosts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+export async function getBlogPosts(authorId?: string): Promise<BlogPost[]> {
+  await delay(100);
+  let posts = [...mockBlogPosts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  if (authorId) {
+    posts = posts.filter(p => p.authorId === authorId);
+  }
+  return posts;
 }
 
 export async function getLandingPageNews(): Promise<BlogPost | null> {
@@ -124,6 +344,7 @@ export async function addBlogPost(postData: CreateBlogPostData): Promise<BlogPos
     imageUrl: postData.imageUrl || `https://placehold.co/600x400.png`,
     imageHint: postData.imageHint || 'placeholder image',
     author: postData.author || 'Admin',
+    authorId: postData.authorId,
     date: postData.date || new Date().toISOString(),
     tags: postData.tags || [],
     isFeatured: postData.isFeatured || false,

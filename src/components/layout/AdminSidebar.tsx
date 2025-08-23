@@ -14,7 +14,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Home, FileText, Edit3, Youtube, LogOut, NewspaperIcon, ListOrdered } from 'lucide-react';
+import { Home, FileText, ListOrdered, NewspaperIcon } from 'lucide-react';
 import type { NavItem } from '@/lib/types';
 import { logout } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
@@ -31,7 +31,8 @@ export default function AdminSidebar() {
 
   const handleLogout = () => {
     logout();
-    router.push('/'); // Changed from /login to /
+    router.push('/');
+    router.refresh();
   };
 
   return (
@@ -49,7 +50,7 @@ export default function AdminSidebar() {
             <SidebarMenuItem key={item.title}>
               <Link href={item.href} legacyBehavior passHref>
                 <SidebarMenuButton
-                  isActive={pathname === item.href || (item.href === '/admin/manage-posts' && pathname.startsWith('/admin/edit-blog'))}
+                  isActive={pathname.startsWith(item.href) && item.href !== '/admin/dashboard' || pathname === item.href}
                   tooltip={item.title}
                   className="justify-start"
                 >
@@ -62,7 +63,7 @@ export default function AdminSidebar() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="p-2">
-         {/* Logout button removed as requested */}
+         {/* Logout button moved to header */}
       </SidebarFooter>
     </Sidebar>
   );

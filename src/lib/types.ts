@@ -7,6 +7,7 @@ export interface BlogPost {
   content: string; // Full HTML or Markdown content
   imageUrl?: string;
   author: string;
+  authorId: string; // Link to the User ID
   date: string; // ISO string representation of date
   tags?: string[];
   imageHint?: string; // For data-ai-hint
@@ -27,7 +28,8 @@ export interface User {
   id: string;
   username: string;
   email: string;
-  password?: string; // Should be hashed in a real DB
+  hashedPassword?: string; // Hashed password
+  password?: string; // Plain text password for mock data
   companyId: string;
   mobile?: string;
 }
@@ -38,7 +40,7 @@ export interface Company {
   address: string;
 }
 
-export type SignUpData = Omit<User, 'id' | 'companyId'> & {
+export type SignUpData = Omit<User, 'id' | 'companyId' | 'hashedPassword'> & {
   companyName: string;
   companyAddress: string;
 };

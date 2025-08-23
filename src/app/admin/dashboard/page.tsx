@@ -2,12 +2,21 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Edit3, Youtube, ArrowRight, ListOrdered } from 'lucide-react';
+import { FileText, ListOrdered, Youtube, ArrowRight } from 'lucide-react';
 import { getBlogPosts } from '@/lib/blogData'; // To get counts
 import DashboardHeaderActions from '@/components/admin/DashboardHeaderActions';
+import { checkAuth } from '@/lib/auth-client';
+import { redirect } from 'next/navigation';
+
 
 export default async function AdminDashboardPage() {
-  const posts = await getBlogPosts(); // Fetch posts for stats
+  const user = checkAuth();
+  if (!user) {
+    redirect('/login');
+  }
+
+  const allPosts = await getBlogPosts();
+  const userPosts = await getBlogPosts(user.id);
 
   const features = [
     {
@@ -28,10 +37,10 @@ export default async function AdminDashboardPage() {
     {
       title: "YouTube Script Generator",
       description: "Transform your articles into scripts ready for your next YouTube video.",
-      href: "/admin/manage-posts", // Should ideally link to a page where user selects a post first
+      href: "/admin/manage-posts", 
       icon: Youtube,
-      cta: "Select Post for Script", // Updated CTA
-      disabled: false, // Enable if manage-posts allows selecting post for script
+      cta: "Select Post for Script", 
+      disabled: false, 
     }
   ];
 
@@ -40,7 +49,7 @@ export default async function AdminDashboardPage() {
       <header className="pb-4 border-b flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, Admin! Manage your content creation workflow here.</p>
+          <p className="text-muted-foreground">Welcome back, {user.username}! Manage your content here.</p>
         </div>
         <DashboardHeaderActions />
       </header>
@@ -75,22 +84,20 @@ export default async function AdminDashboardPage() {
         <div className="grid gap-4 md:grid-cols-3">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Total Posts</CardTitle>
+              <CardTitle className="text-lg">Your Posts</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold">{posts.length}</p>
-              {/* <p className="text-xs text-muted-foreground">+2 this month</p> */}
+              <p className="text-3xl font-bold">{userPosts.length}</p>
+              <p className="text-xs text-muted-foreground">You have {userPosts.length} published articles.</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Last Post Date</CardTitle>
+                <CardTitle className="text-lg">Total Posts on Platform</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-xl font-bold">
-                {posts.length > 0 ? new Date(posts[0].date).toLocaleDateString() : 'N/A'}
-              </p>
-               <Link href="/admin/manage-posts" className="text-xs text-primary hover:underline">View all posts</Link>
+                <p className="text-3xl font-bold">{allPosts.length}</p>
+                <Link href="/blog" target="_blank" className="text-xs text-primary hover:underline">View all posts</Link>
             </CardContent>
           </Card>
            <Card>

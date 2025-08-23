@@ -15,19 +15,26 @@ import { useEffect, useState, useTransition } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { checkAuth } from '@/lib/auth-client';
 
 export default function ManagePostsPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDeleting, setIsDeleting] = useState<string | null>(null); // Store ID of post being deleted
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
+  const user = checkAuth();
 
   const fetchPosts = async () => {
     setIsLoading(true);
+    if (!user) {
+        toast({ title: "Authentication Error", description: "You must be logged in to manage posts.", variant: "destructive" });
+        router.push('/login');
+        return;
+    }
     try {
-      const fetchedPosts = await getBlogPosts();
+      const fetchedPosts = await getBlogPosts(user.id);
       setPosts(fetchedPosts);
     } catch (error) {
       toast({ title: "Error", description: "Failed to fetch posts.", variant: "destructive" });
@@ -38,6 +45,7 @@ export default function ManagePostsPage() {
 
   useEffect(() => {
     fetchPosts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleDeletePost = async (postId: string) => {
@@ -63,11 +71,11 @@ export default function ManagePostsPage() {
     <div className="space-y-8">
       <header className="pb-4 border-b flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Manage Blog Posts</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Manage Your Blog Posts</h1>
           <p className="text-muted-foreground">View, edit, and delete your blog content.</p>
         </div>
         <Button asChild>
-          <Link href="/admin/generate-blog">
+          <Link href="/admin/edit-blog/new">
             <PlusCircle className="mr-2 h-4 w-4" /> Create New Post
           </Link>
         </Button>
@@ -75,8 +83,8 @@ export default function ManagePostsPage() {
 
       <Card className="paper-shadow">
         <CardHeader>
-          <CardTitle>All Posts</CardTitle>
-          <CardDescription>A list of all blog posts in your system.</CardDescription>
+          <CardTitle>Your Posts</CardTitle>
+          <CardDescription>A list of all blog posts you have authored.</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -84,7 +92,7 @@ export default function ManagePostsPage() {
               {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
             </div>
           ) : posts.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">No posts found. <Link href="/admin/generate-blog" className="text-primary hover:underline">Create one now!</Link></p>
+            <p className="text-center text-muted-foreground py-8">You haven't written any posts yet. <Link href="/admin/generate-blog" className="text-primary hover:underline">Create one now!</Link></p>
           ) : (
             <Table>
               <TableHeader>

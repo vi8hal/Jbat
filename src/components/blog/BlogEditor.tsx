@@ -7,14 +7,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Save, Youtube, Loader2, Trash2, Eye, Megaphone } from 'lucide-react'; // Added Megaphone
-import { Switch } from '@/components/ui/switch'; // Added Switch
+import { Save, Youtube, Loader2, Trash2, Eye, Megaphone } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { addBlogPost, getBlogPostById, updateBlogPost, deleteBlogPost } from '@/lib/blogData';
 import type { BlogPost } from '@/lib/types';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { checkAuth } from '@/lib/auth-client';
 
 interface BlogEditorProps {
   initialTitleProp?: string;
@@ -25,7 +26,8 @@ interface BlogEditorProps {
 export default function BlogEditor({ initialTitleProp = '', initialContentProp = '', blogId }: BlogEditorProps) {
   const [title, setTitle] = useState(initialTitleProp);
   const [content, setContent] = useState(initialContentProp);
-  const [author, setAuthor] = useState('Admin');
+  const [author, setAuthor] = useState('');
+  const [authorId, setAuthorId] = useState('');
   const [tagsString, setTagsString] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [imageHint, setImageHint] = useState('');
@@ -41,15 +43,26 @@ export default function BlogEditor({ initialTitleProp = '', initialContentProp =
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
+    const user = checkAuth();
+    if (user) {
+      setAuthor(user.username);
+      setAuthorId(user.id);
+    } else {
+      // Redirect if not authenticated
+      router.push('/login');
+    }
+
     if (blogId !== 'new') {
       setIsLoading(true);
       getBlogPostById(blogId)
         .then(post => {
           if (post) {
+            // Optional: Check if user is the author of the post
             setCurrentPost(post);
             setTitle(post.title);
             setContent(post.content);
             setAuthor(post.author);
+            setAuthorId(post.authorId);
             setTagsString(post.tags?.join(', ') || '');
             setImageUrl(post.imageUrl || '');
             setImageHint(post.imageHint || '');
@@ -67,7 +80,7 @@ export default function BlogEditor({ initialTitleProp = '', initialContentProp =
     } else {
       setTitle(initialTitleProp);
       setContent(initialContentProp);
-      setIsFeatured(false); // Default for new posts
+      setIsFeatured(false);
       setFeaturedAt(null);
     }
   }, [blogId, initialTitleProp, initialContentProp, router, toast]);
@@ -77,14 +90,18 @@ export default function BlogEditor({ initialTitleProp = '', initialContentProp =
       toast({ title: "Validation Error", description: "Title and Content cannot be empty.", variant: "destructive" });
       return;
     }
+    if (!authorId || !author) {
+      toast({ title: "Authentication Error", description: "Could not identify the author.", variant: "destructive" });
+      return;
+    }
     setIsSaving(true);
     
     let postIsFeatured = isFeatured;
     let postFeaturedAt = featuredAt;
 
-    if (isFeatured && !featuredAt) { // If switch is on but featuredAt is not set (e.g. turned on just now)
+    if (isFeatured && !featuredAt) {
         postFeaturedAt = new Date().toISOString();
-    } else if (!isFeatured) { // If switch is off
+    } else if (!isFeatured) {
         postFeaturedAt = null;
     }
 
@@ -92,6 +109,7 @@ export default function BlogEditor({ initialTitleProp = '', initialContentProp =
       title,
       content,
       author,
+      authorId,
       tags: tagsString.split(',').map(tag => tag.trim()).filter(tag => tag),
       imageUrl: imageUrl.trim() || undefined, 
       imageHint: imageHint.trim() || undefined,
@@ -109,7 +127,7 @@ export default function BlogEditor({ initialTitleProp = '', initialContentProp =
         savedPost = await updateBlogPost(blogId, postData);
         toast({ title: "Blog Post Updated!", description: `"${savedPost?.title}" has been updated successfully.` });
         setCurrentPost(savedPost); 
-        if (savedPost) { // Update local state for featured status from potentially modified backend data
+        if (savedPost) {
             setIsFeatured(savedPost.isFeatured || false);
             setFeaturedAt(savedPost.featuredAt || null);
         }
@@ -204,7 +222,7 @@ export default function BlogEditor({ initialTitleProp = '', initialContentProp =
               value={author}
               onChange={(e) => setAuthor(e.target.value)}
               placeholder="Author name"
-              disabled={isSaving || isDeleting}
+              disabled={true} // Author should not be changed, it's the logged-in user
             />
           </div>
           <div className="space-y-2">
