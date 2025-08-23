@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, KeyRound } from 'lucide-react';
+import { Loader2, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { login, signUp, forgotPassword } from '@/lib/auth';
 import { saveAuth } from '@/lib/auth-client';
@@ -35,6 +35,7 @@ export default function AuthForm() {
   const [mobile, setMobile] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [companyAddress, setCompanyAddress] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,9 +103,12 @@ export default function AuthForm() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+                <div className="relative space-y-2">
                     <Label htmlFor="password-signup">Password</Label>
-                    <Input id="password-signup" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isLoading} />
+                    <Input id="password-signup" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isLoading} className="pr-10" />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-9 text-muted-foreground">
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="mobile-signup">Mobile Number</Label>
@@ -146,9 +150,12 @@ export default function AuthForm() {
               <Label htmlFor="identifier">Username or Email</Label>
               <Input id="identifier" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required disabled={isLoading} />
             </div>
-            <div className="space-y-2">
+            <div className="relative space-y-2">
               <Label htmlFor="password-signin">Password</Label>
-              <Input id="password-signin" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isLoading} />
+              <Input id="password-signin" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isLoading} className="pr-10"/>
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-9 text-muted-foreground">
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
             <div className="text-right">
                 <Button variant="link" size="sm" className="p-0 h-auto" type="button" onClick={() => { setEmail(identifier); setFormType('forgotPassword');}}>
