@@ -20,3 +20,25 @@ export interface NavItem {
   icon?: React.ComponentType<{ className?: string }>;
   disabled?: boolean;
 }
+
+// --- New Auth System Types ---
+
+export interface User {
+  id: string;
+  username: string;
+  email: string;
+  password?: string; // Should be hashed in a real DB
+  companyId: string;
+  mobile?: string;
+}
+
+export interface Company {
+  id: string;
+  name: string;
+  address: string;
+}
+
+export type SignUpData = Omit<User, 'id' | 'companyId'> & {
+  companyName: string;
+  companyAddress: string;
+};
