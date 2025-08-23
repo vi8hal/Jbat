@@ -1,3 +1,6 @@
+
+'use server';
+
 // REAL Authentication using Drizzle ORM and Neon DB
 import "dotenv/config";
 import { db } from './db';
@@ -116,19 +119,4 @@ export async function forgotPassword(email: string): Promise<{ success: boolean;
     
     // We return the same message to prevent user enumeration attacks.
     return { success: true, message: `If an account exists for ${email}, a password reset link has been sent.` };
-}
-
-
-export function logout(): void {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("user");
-  }
-}
-
-export function checkAuth(): boolean {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem("isLoggedIn") === "true";
-  }
-  return false;
 }
