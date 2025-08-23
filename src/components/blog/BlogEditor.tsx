@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import { addBlogPost, getBlogPostById, updateBlogPost, deleteBlogPost } from '@/lib/blogData';
 import type { BlogPost } from '@/lib/types';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface BlogEditorProps {
   initialTitleProp?: string;
