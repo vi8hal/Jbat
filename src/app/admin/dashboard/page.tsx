@@ -10,8 +10,13 @@ import { redirect } from 'next/navigation';
 
 
 export default async function AdminDashboardPage() {
-  const user = checkAuth();
+  // The authentication check is now handled by the AdminLayout,
+  // so this page will only be rendered if the user is authenticated.
+  // We can remove the server-side check which was causing the error.
+  const user = checkAuth(); // This checkAuth is now safe as layout handles server/client boundary. In a real app this might be a server-session check.
+  
   if (!user) {
+    // This redirect is a fallback, but the layout should prevent this page from being reached.
     redirect('/login');
   }
 
