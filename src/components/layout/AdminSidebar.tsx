@@ -16,7 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Home, FileText, Edit3, Youtube, LogOut, NewspaperIcon, ListOrdered } from 'lucide-react';
 import type { NavItem } from '@/lib/types';
-import { logout } from '@/lib/auth';
+import { logout } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 
 const adminNavItems: NavItem[] = [

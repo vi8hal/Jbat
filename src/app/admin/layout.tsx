@@ -1,9 +1,10 @@
+
 'use client'; // Required for useEffect and useRouter, and SidebarProvider
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import AdminSidebar from '@/components/layout/AdminSidebar';
-import { checkAuth } from '@/lib/auth';
+import { checkAuth } from '@/lib/auth-client';
 import { Toaster } from '@/components/ui/toaster';
 
 export default function AdminLayout({
