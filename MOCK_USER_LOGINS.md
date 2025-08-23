@@ -8,7 +8,7 @@ You can log in with either the `username` or the `email`.
 | ------------------ | ------------------------ | -------------------- | ------------- |
 | `tech_writer`      | `tech@innovate.com`      | Innovate Inc.        | `password123` |
 | `finance_guru`     | `fin@quantum.com`        | Quantum Finance      | `password123` |
-| `health_expert`    | `health@vitality.com`    | Vitality Health      | `password120` |
+| `health_expert`    | `health@vitality.com`    | Vitality Health      | `password123` |
 | `green_advocate`   | `eco@solutions.com`      | Eco Solutions        | `password123` |
 | `retail_innovator` | `shop@retailnext.com`    | RetailNext           | `password123` |
 | `travel_blogger`   | `go@wanderlust.com`      | Wanderlust Travels   | `password123` |
@@ -16,4 +16,3 @@ You can log in with either the `username` or the `email`.
 | `auto_enthusiast`  | `drive@automotion.com`   | AutoMotion           | `password123` |
 | `realestate_pro`   | `sell@homestead.com`     | Homestead Realty     | `password123` |
 | `media_maven`      | `watch@mediastream.com`  | Media Stream         | `password123` |
-
