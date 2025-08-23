@@ -1,27 +1,69 @@
 
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, ListOrdered, Youtube, ArrowRight } from 'lucide-react';
-import { getBlogPosts } from '@/lib/blogData'; // To get counts
+import { getBlogPosts } from '@/lib/blogData';
 import DashboardHeaderActions from '@/components/admin/DashboardHeaderActions';
 import { checkAuth } from '@/lib/auth-client';
 import { redirect } from 'next/navigation';
+import type { User, BlogPost } from '@/lib/types';
+import { useEffect, useState } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
-export default async function AdminDashboardPage() {
-  // The authentication check is now handled by the AdminLayout,
-  // so this page will only be rendered if the user is authenticated.
-  // We can remove the server-side check which was causing the error.
-  const user = checkAuth(); // This checkAuth is now safe as layout handles server/client boundary. In a real app this might be a server-session check.
+export default function AdminDashboardPage() {
+  const [user, setUser] = useState<Omit<User, 'hashedPassword' | 'password'> | null>(null);
+  const [userPosts, setUserPosts] = useState<BlogPost[]>([]);
+  const [allPosts, setAllPosts] = useState<BlogPost[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const authenticatedUser = checkAuth();
+    if (!authenticatedUser) {
+      redirect('/login');
+    } else {
+      setUser(authenticatedUser);
+      const fetchPosts = async () => {
+        setIsLoading(true);
+        const [userPostsData, allPostsData] = await Promise.all([
+            getBlogPosts(authenticatedUser.id),
+            getBlogPosts()
+        ]);
+        setUserPosts(userPostsData);
+        setAllPosts(allPostsData);
+        setIsLoading(false);
+      };
+      fetchPosts();
+    }
+  }, []);
   
-  if (!user) {
-    // This redirect is a fallback, but the layout should prevent this page from being reached.
-    redirect('/login');
+  if (isLoading || !user) {
+    return (
+        <div className="space-y-8">
+            <header className="pb-4 border-b flex justify-between items-start">
+                <div>
+                    <Skeleton className="h-9 w-64 mb-2" />
+                    <Skeleton className="h-5 w-80" />
+                </div>
+                <Skeleton className="h-10 w-10" />
+            </header>
+            <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-60 w-full" />)}
+            </section>
+             <section>
+                <Skeleton className="h-8 w-48 mb-4" />
+                <div className="grid gap-4 md:grid-cols-3">
+                    <Skeleton className="h-32 w-full" />
+                    <Skeleton className="h-32 w-full" />
+                    <Skeleton className="h-32 w-full" />
+                </div>
+            </section>
+        </div>
+    );
   }
-
-  const allPosts = await getBlogPosts();
-  const userPosts = await getBlogPosts(user.id);
 
   const features = [
     {
