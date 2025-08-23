@@ -1,20 +1,22 @@
 
-import "dotenv/config";
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
 import * as schema from './schema';
 
-if (!process.env.TURSO_DATABASE_URL) {
+const tursoDbUrl = process.env.TURSO_DATABASE_URL;
+const tursoAuthToken = process.env.TURSO_AUTH_TOKEN;
+
+if (!tursoDbUrl) {
   throw new Error("TURSO_DATABASE_URL is not set in the environment variables");
 }
 
-if (!process.env.TURSO_AUTH_TOKEN) {
+if (!tursoAuthToken) {
   throw new Error("TURSO_AUTH_TOKEN is not set in the environment variables");
 }
 
 const client = createClient({
-  url: process.env.TURSO_DATABASE_URL,
-  authToken: process.env.TURSO_AUTH_TOKEN,
+  url: tursoDbUrl,
+  authToken: tursoAuthToken,
 });
 
 export const db = drizzle(client, { schema });
