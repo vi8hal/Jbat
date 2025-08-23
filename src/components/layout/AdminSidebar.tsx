@@ -62,10 +62,7 @@ export default function AdminSidebar() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="p-2">
-         <Button variant="ghost" className="w-full justify-start gap-2 group-data-[collapsible=icon]:justify-center" onClick={handleLogout}>
-            <LogOut className="h-5 w-5" />
-            <span className="group-data-[collapsible=icon]:hidden">Logout</span>
-          </Button>
+         {/* Logout button removed as requested */}
       </SidebarFooter>
     </Sidebar>
   );
