@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, blob } from 'drizzle-orm/sqlite-core';
 import { createId } from '@paralleldrive/cuid2';
 
 export const companies = sqliteTable('companies', {
@@ -18,4 +18,20 @@ export const users = sqliteTable('users', {
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
   passwordResetToken: text('password_reset_token'),
   passwordResetExpires: integer('password_reset_expires', { mode: 'timestamp' }),
+});
+
+export const blogPosts = sqliteTable('blog_posts', {
+    id: text('id').primaryKey().$defaultFn(() => createId()),
+    slug: text('slug').notNull().unique(),
+    title: text('title').notNull(),
+    excerpt: text('excerpt'),
+    content: text('content').notNull(),
+    imageUrl: text('image_url'),
+    authorId: text('author_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    author: text('author').notNull(),
+    date: integer('date', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+    tags: text('tags').$type<string[]>(), // Storing as a JSON string, but treating as array
+    imageHint: text('image_hint'),
+    isFeatured: integer('is_featured', { mode: 'boolean' }).default(false),
+    featuredAt: integer('featured_at', { mode: 'timestamp' }),
 });
