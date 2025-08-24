@@ -1,11 +1,10 @@
 
 'use server';
 
-// This file now simulates a database with mock data.
-// In a real application, this would interact with your Turso DB.
-import "dotenv/config";
+import 'dotenv/config';
 import type { SignUpData, User, Company } from './types';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { mockUsers, mockCompanies } from './blogData'; // Import from centralized mock data
 
 // Simulate API delay
@@ -55,7 +54,7 @@ export async function signUp(data: SignUpData): Promise<{ success: boolean; mess
   return { success: true, user: newUser, message: "Account created successfully!" };
 }
 
-export async function login(identifier: string, password: string): Promise<{ success: boolean; message?: string; user?: Omit<User, 'hashedPassword' | 'password'> }> {
+export async function login(identifier: string, password: string): Promise<{ success: boolean; message?: string; user?: Omit<User, 'hashedPassword' | 'password'>, token?: string }> {
   await delay(500);
 
   const user = mockUsers.find(
@@ -74,11 +73,36 @@ export async function login(identifier: string, password: string): Promise<{ suc
   
   const { hashedPassword, password: plainPassword, ...userSafe } = user;
 
+  // Instead of returning the user object directly, we can just return success
+  // The client will then prompt for OTP. After OTP, we can issue the JWT.
+  // For simulation, we return the user object so the client knows who is logging in.
+  
   return { success: true, user: userSafe };
 }
+
+// This function would be called AFTER successful OTP verification
+export async function issueJwt(userId: string): Promise<{ token: string } | { error: string }> {
+    const user = mockUsers.find(u => u.id === userId);
+    if (!user) {
+        return { error: "User not found." };
+    }
+    const { hashedPassword, password: plainPassword, ...userSafe } = user;
+    
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+        throw new Error("JWT_SECRET is not set in environment variables.");
+    }
+
+    const token = jwt.sign(userSafe, secret, { expiresIn: '1h' });
+
+    return { token };
+}
+
 
 export async function forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
     await delay(700);
     console.log(`Password reset requested for ${email}. In a real app, an email would be sent.`);
+    // Simulate sending OTP
+    console.log(`Simulated OTP for ${email}: 123456`);
     return { success: true, message: `If an account exists for ${email}, a password reset link has been sent.` };
 }

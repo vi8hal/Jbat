@@ -8,12 +8,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, KeyRound, Eye, EyeOff } from 'lucide-react';
+import { Loader2, KeyRound, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { login, signUp, forgotPassword } from '@/lib/auth';
 import { saveAuth } from '@/lib/auth-client';
+import type { User } from '@/lib/types';
 
-type FormType = 'signIn' | 'signUp' | 'forgotPassword';
+
+type FormType = 'signIn' | 'signUp' | 'forgotPassword' | 'otp';
 
 const formVariants = {
   hidden: { opacity: 0, x: 50 },
@@ -36,6 +38,8 @@ export default function AuthForm() {
   const [companyName, setCompanyName] = useState('');
   const [companyAddress, setCompanyAddress] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [tempUser, setTempUser] = useState<Omit<User, 'hashedPassword' | 'password'> | null>(null);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,13 +48,34 @@ export default function AuthForm() {
     setIsLoading(false);
 
     if (result.success && result.user) {
-      toast({ title: "Login Successful", description: "Redirecting to dashboard..." });
-      saveAuth(result.user);
-      router.push('/admin/dashboard');
+      toast({ title: "OTP Required", description: "An OTP has been sent to your email (for demo, use 123456)." });
+      setTempUser(result.user);
+      setFormType('otp');
     } else {
       toast({ title: "Login Failed", description: result.message, variant: "destructive" });
     }
   };
+
+  const handleOtpVerification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    // In a real app, you'd send the OTP to the server for verification.
+    // Here we simulate it.
+    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+    
+    if (otp === '123456' && tempUser) {
+        // Here, the server would return a JWT after successful OTP verification.
+        // We'll simulate that by generating the token on the server via another action.
+        const token = "simulated_jwt_for_" + tempUser.username; // In a real app, this comes from server
+        saveAuth(token, tempUser);
+        toast({ title: "Login Successful", description: "Redirecting to dashboard..." });
+        router.push('/admin/dashboard');
+    } else {
+        toast({ title: "Verification Failed", description: "Invalid OTP. Please try again.", variant: "destructive" });
+    }
+    setIsLoading(false);
+  }
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,16 +86,8 @@ export default function AuthForm() {
     setIsLoading(false);
 
     if (result.success && result.user) {
-      toast({ title: "Sign Up Successful!", description: "You are now logged in. Redirecting..." });
-      // Log in the new user automatically
-      const loginResult = await login(result.user.email, password);
-      if (loginResult.success && loginResult.user) {
-        saveAuth(loginResult.user);
-        router.push('/admin/dashboard');
-      } else {
-         toast({ title: "Auto-Login Failed", description: "Please log in manually.", variant: "destructive" });
-         setFormType('signIn');
-      }
+      toast({ title: "Sign Up Successful!", description: "Please sign in to continue." });
+      setFormType('signIn');
     } else {
       toast({ title: "Sign Up Failed", description: result.message, variant: "destructive" });
     }
@@ -89,6 +106,19 @@ export default function AuthForm() {
 
   const renderForm = () => {
     switch (formType) {
+      case 'otp':
+        return (
+          <motion.form key="otp" onSubmit={handleOtpVerification} variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="otp">One-Time Password</Label>
+              <Input id="otp" type="text" placeholder="Enter your OTP" value={otp} onChange={(e) => setOtp(e.target.value)} required disabled={isLoading} />
+            </div>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Verify & Sign In
+            </Button>
+          </motion.form>
+        );
       case 'signUp':
         return (
           <motion.form key="signUp" onSubmit={handleSignUp} variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
@@ -171,41 +201,65 @@ export default function AuthForm() {
     }
   };
 
+  const getTitle = () => {
+    switch(formType) {
+        case 'signIn': return 'Welcome Back!';
+        case 'signUp': return 'Create Your Account';
+        case 'forgotPassword': return 'Reset Your Password';
+        case 'otp': return 'Two-Factor Authentication';
+    }
+  }
+
+  const getDescription = () => {
+    switch(formType) {
+        case 'signIn': return 'Sign in to access your dashboard.';
+        case 'signUp': return 'Fill out the form below to get started.';
+        case 'forgotPassword': return 'Enter your email to receive a reset link.';
+        case 'otp': return 'Enter the code sent to your email.';
+    }
+  }
+  
+  const getIcon = () => {
+     switch(formType) {
+        case 'otp': return <ShieldCheck className="w-8 h-8" />;
+        default: return <KeyRound className="w-8 h-8" />;
+     }
+  }
+
   return (
     <Card className="w-full max-w-lg paper-shadow">
       <CardHeader className="text-center">
         <div className="mx-auto bg-primary text-primary-foreground rounded-full w-14 h-14 flex items-center justify-center mb-4">
-            <KeyRound className="w-8 h-8" />
+            {getIcon()}
         </div>
-        <CardTitle className="text-2xl">
-          {formType === 'signIn' && 'Welcome Back!'}
-          {formType === 'signUp' && 'Create Your Account'}
-          {formType === 'forgotPassword' && 'Reset Your Password'}
-        </CardTitle>
-        <CardDescription>
-          {formType === 'signIn' && 'Sign in to access your dashboard.'}
-          {formType === 'signUp' && 'Fill out the form below to get started.'}
-          {formType === 'forgotPassword' && 'Enter your email to receive a reset link.'}
-        </CardDescription>
+        <CardTitle className="text-2xl">{getTitle()}</CardTitle>
+        <CardDescription>{getDescription()}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="relative bg-muted p-1 rounded-full grid grid-cols-2 mb-6">
-            <button onClick={() => setFormType('signIn')} className="relative z-10 p-2 rounded-full text-sm font-medium transition-colors disabled:opacity-50" disabled={formType === 'signIn'}>Sign In</button>
-            <button onClick={() => setFormType('signUp')} className="relative z-10 p-2 rounded-full text-sm font-medium transition-colors disabled:opacity-50" disabled={formType === 'signUp'}>Sign Up</button>
-            <motion.div 
-                className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-background rounded-full shadow-sm"
-                initial={false}
-                animate={{ x: formType === 'signIn' ? '0%' : '100%' }}
-                style={{ left: '2px' }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            />
-        </div>
+        {formType !== 'otp' && (
+          <div className="relative bg-muted p-1 rounded-full grid grid-cols-2 mb-6">
+              <button onClick={() => setFormType('signIn')} className="relative z-10 p-2 rounded-full text-sm font-medium transition-colors disabled:opacity-50" disabled={formType === 'signIn'}>Sign In</button>
+              <button onClick={() => setFormType('signUp')} className="relative z-10 p-2 rounded-full text-sm font-medium transition-colors disabled:opacity-50" disabled={formType === 'signUp'}>Sign Up</button>
+              <motion.div 
+                  className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-background rounded-full shadow-sm"
+                  initial={false}
+                  animate={{ x: formType === 'signIn' ? '0%' : '100%' }}
+                  style={{ left: '2px' }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              />
+          </div>
+        )}
         <AnimatePresence mode="wait">
           {renderForm()}
         </AnimatePresence>
       </CardContent>
       {formType === 'forgotPassword' && (
         <CardFooter>
+          <Button variant="link" className="w-full" onClick={() => setFormType('signIn')}>Back to Sign In</Button>
+        </CardFooter>
+      )}
+      {formType === 'otp' && (
+         <CardFooter>
           <Button variant="link" className="w-full" onClick={() => setFormType('signIn')}>Back to Sign In</Button>
         </CardFooter>
       )}

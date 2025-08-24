@@ -1,4 +1,7 @@
 
+
+import { JwtPayload } from "jsonwebtoken";
+
 export interface BlogPost {
   id: string;
   slug: string;
@@ -33,6 +36,10 @@ export interface User {
   companyId: string;
   mobile?: string;
 }
+
+// Extending User to be used as JWT payload
+export interface UserJwtPayload extends User, JwtPayload {}
+
 
 export interface Company {
   id: string;
