@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -11,7 +12,7 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
+        protocol: 'https,
         hostname: 'placehold.co',
         port: '',
         pathname: '/**',
@@ -19,8 +20,9 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
-    allowedDevOrigins: ["https://6000-firebase-studio-1747236689446.cluster-w5vd22whf5gmav2vgkomwtc4go.cloudworkstations.dev"]
-  }
+    // Keep other experimental features here if needed in the future
+  },
+  allowedDevOrigins: ["https://6000-firebase-studio-1747236689446.cluster-w5vd22whf5gmav2vgkomwtc4go.cloudworkstations.dev"]
 };
 
 export default nextConfig;
