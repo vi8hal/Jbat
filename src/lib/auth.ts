@@ -5,22 +5,28 @@ import 'dotenv/config';
 import type { SignUpData, User, Company } from './types';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { mockUsers, mockCompanies } from './blogData'; // Import from centralized mock data
+import { db } from './db';
+import { companies, users } from './db/schema';
+import { eq } from 'drizzle-orm';
+import { createId } from '@paralleldrive/cuid2';
+
 
 // Simulate API delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function getCompanies(): Promise<{ id: string; name: string }[]> {
   await delay(50);
-  return mockCompanies.map(c => ({ id: c.id, name: c.name }));
+  const companyList = await db.select({ id: companies.id, name: companies.name }).from(companies);
+  return companyList;
 }
 
-export async function signUp(data: SignUpData): Promise<{ success: boolean; message?: string; user?: User }> {
+export async function signUp(data: SignUpData): Promise<{ success: boolean; message?: string; user?: Omit<User, 'hashedPassword' | 'password'> }> {
   await delay(700);
 
-  const existingUser = mockUsers.find(
-    u => u.email === data.email || u.username === data.username
-  );
+  const existingUser = await db.query.users.findFirst({
+    where: (users, { or, eq }) => or(eq(users.email, data.email), eq(users.username, data.username)),
+  });
+
 
   if (existingUser) {
     if (existingUser.email === data.email) {
@@ -29,27 +35,33 @@ export async function signUp(data: SignUpData): Promise<{ success: boolean; mess
     return { success: false, message: "This username is already taken." };
   }
 
-  let company = mockCompanies.find(c => c.name.toLowerCase() === data.companyName.toLowerCase());
+  let company = await db.query.companies.findFirst({
+    where: (companies, { eq }) => eq(companies.name, data.companyName)
+  });
+
   if (!company) {
-    company = {
-      id: `company-${Date.now()}`,
+    const [newCompany] = await db.insert(companies).values({
       name: data.companyName,
       address: data.companyAddress,
-    };
-    mockCompanies.push(company);
+    }).returning();
+    company = newCompany;
   }
 
   const hashedPassword = await bcrypt.hash(data.password, 10);
-  const newUser: User = {
-    id: `user-${Date.now()}`,
+  
+  const [newUser] = await db.insert(users).values({
     username: data.username,
     email: data.email,
     hashedPassword: hashedPassword,
     companyId: company.id,
     mobile: data.mobile,
-  };
-
-  mockUsers.push(newUser);
+  }).returning({
+      id: users.id,
+      username: users.username,
+      email: users.email,
+      companyId: users.companyId,
+      mobile: users.mobile,
+  });
   
   return { success: true, user: newUser, message: "Account created successfully!" };
 }
@@ -57,9 +69,9 @@ export async function signUp(data: SignUpData): Promise<{ success: boolean; mess
 export async function login(identifier: string, password: string): Promise<{ success: boolean; message?: string; user?: Omit<User, 'hashedPassword' | 'password'>, token?: string }> {
   await delay(500);
 
-  const user = mockUsers.find(
-    u => u.username === identifier || u.email === identifier
-  );
+  const user = await db.query.users.findFirst({
+    where: (users, { or, eq }) => or(eq(users.email, identifier), eq(users.username, identifier)),
+  });
 
   if (!user || !user.hashedPassword) {
     return { success: false, message: "Invalid credentials. Please try again." };
@@ -71,7 +83,7 @@ export async function login(identifier: string, password: string): Promise<{ suc
     return { success: false, message: "Invalid credentials. Please try again." };
   }
   
-  const { hashedPassword, password: plainPassword, ...userSafe } = user;
+  const { hashedPassword, passwordResetToken, passwordResetExpires, ...userSafe } = user;
 
   // Instead of returning the user object directly, we can just return success
   // The client will then prompt for OTP. After OTP, we can issue the JWT.
@@ -82,15 +94,16 @@ export async function login(identifier: string, password: string): Promise<{ suc
 
 // This function would be called AFTER successful OTP verification
 export async function issueJwt(userId: string): Promise<{ token: string } | { error: string }> {
-    const user = mockUsers.find(u => u.id === userId);
+    const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
     if (!user) {
         return { error: "User not found." };
     }
-    const { hashedPassword, password: plainPassword, ...userSafe } = user;
+    const { hashedPassword, passwordResetExpires, passwordResetToken, ...userSafe } = user;
     
     const secret = process.env.JWT_SECRET;
     if (!secret) {
-        throw new Error("JWT_SECRET is not set in environment variables.");
+        console.error("JWT_SECRET is not set in environment variables.");
+        throw new Error("Server configuration error: JWT secret is missing.");
     }
 
     const token = jwt.sign(userSafe, secret, { expiresIn: '1h' });
