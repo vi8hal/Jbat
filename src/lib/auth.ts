@@ -9,16 +9,27 @@ import { db } from './db';
 import { companies, users } from './db/schema';
 import { eq } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
-
+import { sendVerificationEmail } from './email';
 
 // Simulate API delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-export async function getCompanies(): Promise<{ id: string; name: string }[]> {
-  await delay(50);
-  const companyList = await db.select({ id: companies.id, name: companies.name }).from(companies);
-  return companyList;
+// Helper function to generate a 6-digit OTP
+const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
+
+// Helper function to set OTP on a user record
+async function setOtpForUser(userId: string): Promise<string> {
+  const otp = generateOtp();
+  const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // OTP expires in 10 minutes
+
+  await db.update(users).set({
+    otp,
+    otpExpires,
+  }).where(eq(users.id, userId));
+
+  return otp;
 }
+
 
 export async function signUp(data: SignUpData): Promise<{ success: boolean; message?: string; user?: Omit<User, 'hashedPassword' | 'password'> }> {
   await delay(700);
@@ -62,11 +73,14 @@ export async function signUp(data: SignUpData): Promise<{ success: boolean; mess
       companyId: users.companyId,
       mobile: users.mobile,
   });
+
+  const otp = await setOtpForUser(newUser.id);
+  await sendVerificationEmail(newUser.email, otp);
   
-  return { success: true, user: newUser, message: "Account created successfully!" };
+  return { success: true, user: newUser, message: "Account created successfully! Please check your email for an OTP." };
 }
 
-export async function login(identifier: string, password: string): Promise<{ success: boolean; message?: string; user?: Omit<User, 'hashedPassword' | 'password'>, token?: string }> {
+export async function login(identifier: string, password: string): Promise<{ success: boolean; message?: string; user?: Omit<User, 'hashedPassword' | 'password'> }> {
   await delay(500);
 
   const user = await db.query.users.findFirst({
@@ -83,13 +97,45 @@ export async function login(identifier: string, password: string): Promise<{ suc
     return { success: false, message: "Invalid credentials. Please try again." };
   }
   
-  const { hashedPassword, passwordResetToken, passwordResetExpires, ...userSafe } = user;
+  const { hashedPassword, passwordResetToken, passwordResetExpires, otp, otpExpires, ...userSafe } = user;
 
-  // Instead of returning the user object directly, we can just return success
-  // The client will then prompt for OTP. After OTP, we can issue the JWT.
-  // For simulation, we return the user object so the client knows who is logging in.
-  
-  return { success: true, user: userSafe };
+  const newOtp = await setOtpForUser(user.id);
+  await sendVerificationEmail(user.email, newOtp);
+
+  return { success: true, user: userSafe, message: "OTP sent to your email." };
+}
+
+export async function verifyOtp(userId: string, otp: string): Promise<{ success: boolean; message: string; token?: string }> {
+  await delay(500);
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+
+  if (!user || !user.otp || !user.otpExpires) {
+    return { success: false, message: "Invalid request. Please try signing in again." };
+  }
+
+  if (user.otpExpires < new Date()) {
+    return { success: false, message: "Your OTP has expired. Please try signing in again." };
+  }
+
+  if (user.otp !== otp) {
+    return { success: false, message: "Invalid OTP. Please check the code and try again." };
+  }
+
+  // Clear OTP fields after successful verification
+  await db.update(users).set({
+    otp: null,
+    otpExpires: null,
+  }).where(eq(users.id, user.id));
+
+  // Issue JWT
+  const jwtResult = await issueJwt(user.id);
+  if ('error' in jwtResult) {
+    return { success: false, message: jwtResult.error };
+  }
+
+  return { success: true, message: "Verification successful!", token: jwtResult.token };
 }
 
 // This function would be called AFTER successful OTP verification
@@ -98,7 +144,7 @@ export async function issueJwt(userId: string): Promise<{ token: string } | { er
     if (!user) {
         return { error: "User not found." };
     }
-    const { hashedPassword, passwordResetExpires, passwordResetToken, ...userSafe } = user;
+    const { hashedPassword, passwordResetExpires, passwordResetToken, otp, otpExpires, ...userSafe } = user;
     
     const secret = process.env.JWT_SECRET;
     if (!secret) {
@@ -114,8 +160,15 @@ export async function issueJwt(userId: string): Promise<{ token: string } | { er
 
 export async function forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
     await delay(700);
-    console.log(`Password reset requested for ${email}. In a real app, an email would be sent.`);
-    // Simulate sending OTP
-    console.log(`Simulated OTP for ${email}: 123456`);
-    return { success: true, message: `If an account exists for ${email}, a password reset link has been sent.` };
+    const user = await db.query.users.findFirst({ where: eq(users.email, email) });
+
+    if (!user) {
+      // We don't want to reveal if an email exists or not
+      return { success: true, message: `If an account exists for ${email}, an OTP has been sent.` };
+    }
+
+    const otp = await setOtpForUser(user.id);
+    await sendVerificationEmail(user.email, otp);
+    
+    return { success: true, message: `If an account exists for ${email}, an OTP has been sent.` };
 }

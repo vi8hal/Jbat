@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, KeyRound, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { login, signUp, forgotPassword } from '@/lib/auth';
+import { login, signUp, forgotPassword, verifyOtp } from '@/lib/auth';
 import { saveAuth } from '@/lib/auth-client';
 import type { User } from '@/lib/types';
 
@@ -48,7 +48,7 @@ export default function AuthForm() {
     setIsLoading(false);
 
     if (result.success && result.user) {
-      toast({ title: "OTP Required", description: "An OTP has been sent to your email (for demo, use 123456)." });
+      toast({ title: "OTP Required", description: "An OTP has been sent to your email." });
       setTempUser(result.user);
       setFormType('otp');
     } else {
@@ -58,23 +58,19 @@ export default function AuthForm() {
 
   const handleOtpVerification = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!tempUser) return;
     setIsLoading(true);
-    
-    // In a real app, you'd send the OTP to the server for verification.
-    // Here we simulate it.
-    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-    
-    if (otp === '123456' && tempUser) {
-        // Here, the server would return a JWT after successful OTP verification.
-        // We'll simulate that by generating the token on the server via another action.
-        const token = "simulated_jwt_for_" + tempUser.username; // In a real app, this comes from server
-        saveAuth(token, tempUser);
+
+    const result = await verifyOtp(tempUser.id, otp);
+    setIsLoading(false);
+
+    if (result.success && result.token && tempUser) {
+        saveAuth(result.token, tempUser);
         toast({ title: "Login Successful", description: "Redirecting to dashboard..." });
         router.push('/admin/dashboard');
     } else {
-        toast({ title: "Verification Failed", description: "Invalid OTP. Please try again.", variant: "destructive" });
+        toast({ title: "Verification Failed", description: result.message, variant: "destructive" });
     }
-    setIsLoading(false);
   }
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -86,8 +82,9 @@ export default function AuthForm() {
     setIsLoading(false);
 
     if (result.success && result.user) {
-      toast({ title: "Sign Up Successful!", description: "Please sign in to continue." });
-      setFormType('signIn');
+      toast({ title: "Sign Up Successful!", description: "An OTP has been sent to your email to verify your account." });
+      setTempUser(result.user);
+      setFormType('otp');
     } else {
       toast({ title: "Sign Up Failed", description: result.message, variant: "destructive" });
     }
@@ -100,7 +97,7 @@ export default function AuthForm() {
     setIsLoading(false);
     toast({ title: "Request Sent", description: result.message });
     if(result.success) {
-      setFormType('signIn');
+      // Don't switch form, let them stay to see the message, maybe they need to resend
     }
   };
 
@@ -111,7 +108,7 @@ export default function AuthForm() {
           <motion.form key="otp" onSubmit={handleOtpVerification} variants={formVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="otp">One-Time Password</Label>
-              <Input id="otp" type="text" placeholder="Enter your OTP" value={otp} onChange={(e) => setOtp(e.target.value)} required disabled={isLoading} />
+              <Input id="otp" type="text" placeholder="Enter the OTP from your email" value={otp} onChange={(e) => setOtp(e.target.value)} required disabled={isLoading} />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -215,7 +212,7 @@ export default function AuthForm() {
         case 'signIn': return 'Sign in to access your dashboard.';
         case 'signUp': return 'Fill out the form below to get started.';
         case 'forgotPassword': return 'Enter your email to receive a reset link.';
-        case 'otp': return 'Enter the code sent to your email.';
+        case 'otp': return 'Enter the code sent to your email to complete sign in or registration.';
     }
   }
   

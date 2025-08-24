@@ -18,6 +18,8 @@ export const users = sqliteTable('users', {
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
   passwordResetToken: text('password_reset_token'),
   passwordResetExpires: integer('password_reset_expires', { mode: 'timestamp' }),
+  otp: text('otp'),
+  otpExpires: integer('otp_expires', { mode: 'timestamp' }),
 });
 
 export const blogPosts = sqliteTable('blog_posts', {
