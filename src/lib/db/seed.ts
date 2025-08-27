@@ -43,7 +43,7 @@ const mockBlogPostsRaw = [
 async function main() {
     console.log("Seeding database...");
 
-    // Clear existing data
+    // Clear existing data in the correct order
     await db.delete(blogPosts);
     await db.delete(users);
     await db.delete(companies);
