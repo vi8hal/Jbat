@@ -1,5 +1,5 @@
+import 'dotenv/config'; // Must be at the top
 import { defineConfig } from "drizzle-kit";
-import "dotenv/config";
 
 if (!process.env.TURSO_DATABASE_URL) {
   throw new Error("TURSO_DATABASE_URL is missing from .env file");
