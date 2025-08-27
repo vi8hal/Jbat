@@ -5,11 +5,44 @@ import BlogPostCard from '@/components/blog/BlogPostCard';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Megaphone, CalendarDays, UserCircle } from 'lucide-react';
+import { Megaphone, CalendarDays, UserCircle, AlertTriangle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default async function HomePage() {
-  const featuredPost = await getLandingPageNews();
-  const allPosts = await getBlogPosts();
+  let featuredPost: BlogPost | null = null;
+  let allPosts: BlogPost[] = [];
+  let dbError = false;
+
+  try {
+    [featuredPost, allPosts] = await Promise.all([
+      getLandingPageNews(),
+      getBlogPosts(),
+    ]);
+  } catch (error) {
+    console.error("Database error fetching blog posts:", error);
+    dbError = true;
+  }
+  
+  if (dbError) {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <Alert variant="destructive" className="max-w-2xl mx-auto">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Database Connection Error</AlertTitle>
+          <AlertDescription>
+            <p>We couldn't connect to the database to fetch blog posts. This usually means the database has not been set up correctly yet.</p>
+            <p className="mt-2 font-semibold">Please run the following commands in your terminal to initialize the database:</p>
+            <code className="block bg-muted p-2 rounded-md my-2 text-sm">
+              1. npm run db:push <br/>
+              2. npm run db:seed
+            </code>
+            <p>If the issue persists, please check your `.env` file for the correct `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` values.</p>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
 
   // If there's a featured post, it will be shown at the top.
   // The grid below should show all other posts.
