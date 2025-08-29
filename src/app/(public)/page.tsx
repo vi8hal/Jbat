@@ -36,13 +36,6 @@ export default function LandingPage() {
               <p className="mt-4 text-lg text-muted-foreground md:text-xl">
                 Welcome to JBat. Your intelligent partner for creating compelling blog content and YouTube scripts effortlessly.
               </p>
-              <div className="mt-8">
-                <Button asChild size="lg">
-                  <Link href="/admin/dashboard">
-                    User Demo <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-              </div>
             </div>
           </div>
         </section>
