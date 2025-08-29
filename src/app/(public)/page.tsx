@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, BotMessageSquare, Edit, Youtube } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
+import { motion } from 'framer-motion';
 
 const features = [
   {
@@ -24,6 +25,35 @@ const features = [
     description: 'A complete CRUD interface to manage your posts. Edit, delete, and feature articles on your landing page with a simple click.',
   },
 ];
+
+function BackgroundSquares() {
+    return (
+        <div className="absolute inset-0 -z-10 h-full w-full">
+            <div className="relative h-full w-full">
+                {Array.from({ length: 15 }).map((_, i) => (
+                    <motion.div
+                        key={i}
+                        className="absolute bg-white/5"
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{
+                            duration: 0.5,
+                            delay: i * 0.1,
+                            ease: 'easeInOut',
+                        }}
+                        style={{
+                            width: `${Math.floor(Math.random() * 50) + 20}px`,
+                            height: `${Math.floor(Math.random() * 50) + 20}px`,
+                            top: `${Math.floor(Math.random() * 90)}%`,
+                            left: `${Math.floor(Math.random() * 90)}%`,
+                            borderRadius: '8px',
+                        }}
+                    />
+                ))}
+            </div>
+        </div>
+    );
+}
 
 
 function AnimatedHeroSection() {
@@ -45,6 +75,7 @@ function AnimatedHeroSection() {
         transition: 'background 0.2s ease-out'
       }}
     >
+      <BackgroundSquares />
       <div className="container mx-auto px-4 md:px-6 text-center relative z-10">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl text-foreground">
