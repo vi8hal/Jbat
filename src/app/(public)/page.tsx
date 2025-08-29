@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, BotMessageSquare, Edit, Youtube } from 'lucide-react';
 import Link from 'next/link';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 const features = [
@@ -27,29 +27,36 @@ const features = [
 ];
 
 function BackgroundSquares() {
+    const [squares, setSquares] = useState<JSX.Element[]>([]);
+
+    useEffect(() => {
+        const newSquares = Array.from({ length: 15 }).map((_, i) => (
+            <motion.div
+                key={i}
+                className="absolute bg-white/5"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{
+                    duration: 0.5,
+                    delay: i * 0.1,
+                    ease: 'easeInOut',
+                }}
+                style={{
+                    width: `${Math.floor(Math.random() * 50) + 20}px`,
+                    height: `${Math.floor(Math.random() * 50) + 20}px`,
+                    top: `${Math.floor(Math.random() * 90)}%`,
+                    left: `${Math.floor(Math.random() * 90)}%`,
+                    borderRadius: '8px',
+                }}
+            />
+        ));
+        setSquares(newSquares);
+    }, []);
+
     return (
         <div className="absolute inset-0 -z-10 h-full w-full">
             <div className="relative h-full w-full">
-                {Array.from({ length: 15 }).map((_, i) => (
-                    <motion.div
-                        key={i}
-                        className="absolute bg-white/5"
-                        initial={{ opacity: 0, scale: 0.5 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{
-                            duration: 0.5,
-                            delay: i * 0.1,
-                            ease: 'easeInOut',
-                        }}
-                        style={{
-                            width: `${Math.floor(Math.random() * 50) + 20}px`,
-                            height: `${Math.floor(Math.random() * 50) + 20}px`,
-                            top: `${Math.floor(Math.random() * 90)}%`,
-                            left: `${Math.floor(Math.random() * 90)}%`,
-                            borderRadius: '8px',
-                        }}
-                    />
-                ))}
+                {squares}
             </div>
         </div>
     );
@@ -57,7 +64,7 @@ function BackgroundSquares() {
 
 
 function AnimatedHeroSection() {
-  const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
