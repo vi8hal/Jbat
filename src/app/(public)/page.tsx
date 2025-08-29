@@ -1,8 +1,11 @@
 
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, BotMessageSquare, Edit, Youtube } from 'lucide-react';
 import Link from 'next/link';
+import React from 'react';
 
 const features = [
   {
@@ -22,23 +25,47 @@ const features = [
   },
 ];
 
+
+function AnimatedHeroSection() {
+  const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setMousePosition({ x, y });
+  };
+
+  return (
+    <section
+      onMouseMove={handleMouseMove}
+      className="relative w-full py-20 md:py-32 lg:py-40 bg-secondary/50 overflow-hidden"
+      style={{
+        background: `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(200, 200, 220, 0.15), transparent 40%)`,
+        transition: 'background 0.2s ease-out'
+      }}
+    >
+      <div className="container mx-auto px-4 md:px-6 text-center relative z-10">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl text-foreground">
+            AI-Powered Content Creation, Simplified.
+          </h1>
+          <p className="mt-4 text-lg text-muted-foreground md:text-xl">
+            Welcome to JBat. Your intelligent partner for creating compelling blog content and YouTube scripts effortlessly.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+
 export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="w-full py-20 md:py-32 lg:py-40 bg-secondary/50">
-          <div className="container mx-auto px-4 md:px-6 text-center">
-            <div className="max-w-3xl mx-auto">
-              <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl text-foreground">
-                AI-Powered Content Creation, Simplified.
-              </h1>
-              <p className="mt-4 text-lg text-muted-foreground md:text-xl">
-                Welcome to JBat. Your intelligent partner for creating compelling blog content and YouTube scripts effortlessly.
-              </p>
-            </div>
-          </div>
-        </section>
+        <AnimatedHeroSection />
 
         {/* Features Section */}
         <section id="features" className="w-full py-20 md:py-24 lg:py-32">
