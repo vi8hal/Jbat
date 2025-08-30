@@ -21,10 +21,15 @@ export function checkAuth(): Omit<User, 'hashedPassword' | 'password'> | null {
         // In a real app, you would verify the token's signature on the server.
         // For the client, we can decode it to get user info for the UI.
         const decoded: User = jwtDecode(token);
-        // Let's also check if the user object is stored from legacy sessions
         const storedUser = localStorage.getItem("user");
-        if (storedUser) return JSON.parse(storedUser);
-
+        if (storedUser) {
+            const parsedUser: User = JSON.parse(storedUser);
+            // Ensure the user from token matches stored user
+            if (parsedUser.id === decoded.id) {
+                return parsedUser;
+            }
+        }
+        // If stored user doesn't match or doesn't exist, rely on token data
         return decoded;
       } catch (e) {
         console.error("Failed to decode token", e);
@@ -32,8 +37,6 @@ export function checkAuth(): Omit<User, 'hashedPassword' | 'password'> | null {
         return null;
       }
     }
-     const legacyUser = localStorage.getItem("user");
-     if(legacyUser) return JSON.parse(legacyUser);
   }
   return null;
 }
