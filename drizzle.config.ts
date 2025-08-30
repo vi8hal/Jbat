@@ -1,3 +1,4 @@
+
 import 'dotenv/config'; // Must be at the top
 import { defineConfig } from "drizzle-kit";
 
@@ -12,7 +13,7 @@ if (!process.env.TURSO_AUTH_TOKEN) {
 export default defineConfig({
   schema: "./src/lib/db/schema.ts",
   out: "./drizzle",
-  dialect: "turso",
+  dialect: "sqlite",
   driver: "turso",
   dbCredentials: {
     url: process.env.TURSO_DATABASE_URL,
