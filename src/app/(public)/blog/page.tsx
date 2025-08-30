@@ -14,6 +14,7 @@ export default async function HomePage() {
   let dbError = false;
 
   try {
+    // We use Promise.all to fetch both in parallel for efficiency
     [featuredPost, allPosts] = await Promise.all([
       getLandingPageNews(),
       getBlogPosts(),
@@ -23,6 +24,8 @@ export default async function HomePage() {
     dbError = true;
   }
   
+  // If the database connection fails, render a helpful error message
+  // This is crucial for the initial setup and for Vercel builds.
   if (dbError) {
     return (
       <div className="container mx-auto py-8 px-4">
